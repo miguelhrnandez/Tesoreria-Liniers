@@ -361,11 +361,11 @@ footer{font-size:12.5px;color:var(--muted)}
   const clearDesglose = () => MONS.forEach(k => MON[k].denoms.forEach(d => { $('d-'+k+'-'+d).value=''; }));
 
   /* ---------- Supabase ---------- */
-  // Completar con los datos de su proyecto (Project Settings > API en Supabase)
-  const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
-  const SUPABASE_ANON_KEY = 'TU-ANON-KEY';
+  // Proyecto de Supabase y clave pública (anon). Nunca poner acá la clave service_role.
+  const SUPABASE_URL = 'https://mwblnzzesjajzxmpuqbe.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13Ymxuenplc2phanp4bXB1cWJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMjI1ODAsImV4cCI6MjA5MTc5ODU4MH0.ahMEabDGeVR9Yj4RiMUeX3eY_N4FnIfSZvMCK0vIwaw';
   const configurado = !SUPABASE_URL.includes('TU-PROYECTO') && !SUPABASE_ANON_KEY.includes('TU-ANON');
-  const sb = configurado && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  const sb = configurado && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {auth:{storageKey:'mas-duenos-caja-auth'}}) : null;
 
   const entry = uid => (S.cajas[uid] = S.cajas[uid] || {uid, perfil:null, mov:[], anul:[], pases:[]});
   const mia = () => entry(S.uid);
@@ -377,9 +377,9 @@ footer{font-size:12.5px;color:var(--muted)}
     if(cargando) return cargando;
     cargando = (async () => {
       try{
-        let qp = sb.from('perfiles').select('*');
-        let qm = sb.from('movimientos').select('*').in('estado', ['en_caja','anulada']);
-        let qx = sb.from('pases').select('*').order('created_at', {ascending:false}).limit(1000);
+        let qp = sb.from('caja_perfiles').select('*');
+        let qm = sb.from('caja_movimientos').select('*').in('estado', ['en_caja','anulada']);
+        let qx = sb.from('caja_pases').select('*').order('created_at', {ascending:false}).limit(1000);
         if(!S.isOwner){ qp = qp.eq('id', S.uid); qm = qm.eq('owner', S.uid); qx = qx.eq('owner', S.uid); }
         const [perfiles, movs, pases] = (await Promise.all([qp, qm, qx])).map(chk);
         const nuevo = {};
@@ -402,7 +402,7 @@ footer{font-size:12.5px;color:var(--muted)}
     for(const x of Object.values(porPase)){
       const src = ((S.cajas[x.uid]||{}).pases||[]).find(q => q.numero===x.numero);
       const ent = Object.assign({}, (src && src.entregado) || {}); x.mons.forEach(k => { ent[k] = valor; });
-      chk(await sb.from('pases').update({entregado: ent}).eq('numero', x.numero));
+      chk(await sb.from('caja_pases').update({entregado: ent}).eq('numero', x.numero));
     }
   }
   function setStatus(tipo, texto){ $('status').innerHTML = '<span class="dot '+tipo+'"></span><span>'+esc(texto)+'</span>'; }
@@ -540,13 +540,13 @@ footer{font-size:12.5px;color:var(--muted)}
   $('form-perfil').addEventListener('submit', async ev => {
     ev.preventDefault();
     const nombre = $('p-nombre').value.trim(); if(!nombre){ msg($('perfil-msg'),'err','Falta el nombre del responsable.'); return; }
-    const data = {responsable:nombre, caja:$('p-caja').value, sucursal:$('p-sucursal').value.trim()||'Liniers', actualizado:new Date().toISOString()};
-    try{ chk(await sb.from('perfiles').upsert({id:S.uid, responsable:data.responsable, caja:data.caja, sucursal:data.sucursal, actualizado:data.actualizado})); S.perfil = data; mia().perfil = data; S.editando=false; S.tab='mi'; await cargar(); }
+    const data = {responsable:nombre, caja:S.cajaAsignada, sucursal:$('p-sucursal').value.trim()||'Liniers', actualizado:new Date().toISOString()};
+    try{ chk(await sb.from('caja_perfiles').upsert({id:S.uid, responsable:data.responsable, caja:data.caja, sucursal:data.sucursal, actualizado:data.actualizado})); S.perfil = data; mia().perfil = data; S.editando=false; S.tab='mi'; await cargar(); }
     catch(e){ msg($('perfil-msg'),'err',errTxt(e)); }
   });
   $('perfil-cancel').addEventListener('click', () => { S.editando=false; render(); });
   $('btn-editar-perfil').addEventListener('click', () => {
-    S.editando = true; const p = S.perfil||{}; $('p-nombre').value = p.responsable||''; $('p-caja').value = p.caja||'onb'; $('p-sucursal').value = p.sucursal||'Liniers'; render();
+    S.editando = true; const p = S.perfil||{}; $('p-nombre').value = p.responsable||''; $('p-caja').value = S.cajaAsignada; $('p-sucursal').value = p.sucursal||'Liniers'; render();
   });
 
   function reciboExistente(e, key){
@@ -571,7 +571,7 @@ footer{font-size:12.5px;color:var(--muted)}
       if(dup && S.dupOk !== key){ S.dupOk = key; return msg($('venta-msg'),'info','El recibo '+m.recibo+' ya está cargado en esta caja ('+dup.cliente+', '+fdate(dup.fecha)+', '+fmt(dup.monto, monOf(dup))+'). Si es correcto, tocar «Cargar venta» otra vez para guardarla igual.'); }
     }
     S.dupOk = null;
-    try{ const {estado, ...dataMov} = m; chk(await sb.from('movimientos').insert({owner:S.uid, estado:'en_caja', data:dataMov})); await cargar(); msg($('venta-msg'),'ok','Venta de '+m.cliente+' por '+fmt(m.monto, m.moneda)+' cargada.'); ['v-cliente','v-recibo','v-monto'].forEach(id => $(id).value=''); $('v-cliente').focus(); }
+    try{ const {estado, ...dataMov} = m; chk(await sb.from('caja_movimientos').insert({owner:S.uid, estado:'en_caja', data:dataMov})); await cargar(); msg($('venta-msg'),'ok','Venta de '+m.cliente+' por '+fmt(m.monto, m.moneda)+' cargada.'); ['v-cliente','v-recibo','v-monto'].forEach(id => $(id).value=''); $('v-cliente').focus(); }
     catch(e){ msg($('venta-msg'),'err',errTxt(e)); }
   });
 
@@ -612,9 +612,9 @@ footer{font-size:12.5px;color:var(--muted)}
     $('btn-pase').disabled = true;
     try{
       const data = Object.assign({}, p); delete data.estado;
-      chk(await sb.from('pases').insert({numero:p.numero, owner:S.uid, estado:'pendiente', destino, created_at:p.createdAt, data}));
+      chk(await sb.from('caja_pases').insert({numero:p.numero, owner:S.uid, estado:'pendiente', destino, created_at:p.createdAt, data}));
       const ids = sel.filter(m => m.tipo!=='pase').map(m => m.id);
-      if(ids.length) chk(await sb.from('movimientos').update({estado:'pasado', pase:p.numero}).in('id', ids));
+      if(ids.length) chk(await sb.from('caja_movimientos').update({estado:'pasado', pase:p.numero}).in('id', ids));
       await marcarEntregados(sel.filter(m => m.tipo==='pase'), p.numero);
     }catch(e){ $('btn-pase').disabled = false; await cargar(); return msg($('pase-msg'),'err',errTxt(e)); }
     await cargar();
@@ -645,12 +645,12 @@ footer{font-size:12.5px;color:var(--muted)}
     S.conf = null; S.conteo = {}; S.focusId = null;
     try{
       if(patch){
-        const {estado, ...recepcion} = patch; chk(await sb.from('pases').update({estado, recepcion}).eq('numero', numero));
+        const {estado, ...recepcion} = patch; chk(await sb.from('caja_pases').update({estado, recepcion}).eq('numero', numero));
         msg(msgEl, patch.conDiferencia ? 'info' : 'ok', patch.conDiferencia ? 'Pase '+numero+' recibido con diferencia: '+difTexto(patch)+'.' : 'Pase '+numero+' recibido sin diferencias.');
       }
       else {
-        chk(await sb.from('pases').update({estado:'anulado', anulacion:{anuladoAt:now, anuladoPor:S.uid}}).eq('numero', numero));
-        chk(await sb.from('movimientos').update({estado:'en_caja', pase:null}).eq('pase', numero));
+        chk(await sb.from('caja_pases').update({estado:'anulado', anulacion:{anuladoAt:now, anuladoPor:S.uid}}).eq('numero', numero));
+        chk(await sb.from('caja_movimientos').update({estado:'en_caja', pase:null}).eq('pase', numero));
         await marcarEntregados((p.movimientos||[]).filter(m => m.tipo==='pase'), null);
       }
     }catch(err){ msg(msgEl,'err',errTxt(err)); }
@@ -677,7 +677,7 @@ footer{font-size:12.5px;color:var(--muted)}
         const motivo = (S.motivo||'').trim();
         if(!motivo){ const i=$('motivo-input'); if(i){ i.focus(); i.setAttribute('aria-invalid','true'); i.placeholder='El motivo es obligatorio'; } return; }
         S.conf=null; S.motivo='';
-        sb.from('movimientos').update({estado:'anulada', motivo, anulada_at:new Date().toISOString(), anulada_por:S.uid}).eq('id', id).then(chk).then(cargar).catch(e => msg($('mi-pases-msg'),'err',errTxt(e)));
+        sb.from('caja_movimientos').update({estado:'anulada', motivo, anulada_at:new Date().toISOString(), anulada_por:S.uid}).eq('id', id).then(chk).then(cargar).catch(e => msg($('mi-pases-msg'),'err',errTxt(e)));
         render();
       }
       else accionPase(uid, id, c.accion, msgEl);
@@ -854,7 +854,7 @@ footer{font-size:12.5px;color:var(--muted)}
     if(S.perfil===null || S.editando){
       $('v-login').hidden=true; $('v-espera').hidden=true; $('v-app').hidden=true; $('v-perfil').hidden=false;
       $('perfil-cancel').hidden = !S.editando;
-      if(S.perfil===null && S.isOwner && !$('p-nombre').value) $('p-caja').value='tesoreria';
+      $('p-caja').value = S.cajaAsignada; $('p-caja').disabled = true;
       return;
     }
     $('v-login').hidden=true; $('v-espera').hidden=true; $('v-perfil').hidden=true; $('v-app').hidden=false;
@@ -870,7 +870,7 @@ footer{font-size:12.5px;color:var(--muted)}
 
   /* ---------- arranque ---------- */
   function mostrarLogin(){
-    S.uid = null; S.isOwner = false; S.perfil = undefined; S.cajas = {}; S.conf = null;
+    S.uid = null; S.isOwner = false; S.cajaAsignada = null; S.perfil = undefined; S.cajas = {}; S.conf = null;
     $('v-espera').hidden = true; $('v-perfil').hidden = true; $('v-app').hidden = true; $('v-login').hidden = false; $('btn-salir').hidden = true;
     setStatus('off', 'Sin sesión');
   }
@@ -882,7 +882,11 @@ footer{font-size:12.5px;color:var(--muted)}
     if(!uid){ mostrarLogin(); return; }
     S.uid = uid; S.perfil = undefined; S.cajas = {};
     espera('Cargando su caja…', 'Un momento.'); $('btn-salir').hidden = false;
-    try{ S.isOwner = !!chk(await sb.rpc('es_admin')); }catch(e){ S.isOwner = false; }
+    let acceso = null;
+    try{ acceso = chk(await sb.from('caja_usuarios').select('caja,admin').eq('user_id', uid).maybeSingle()); }
+    catch(e){ espera('No se pudo verificar el acceso', 'Revisar la conexión y recargar la página. (' + (e.message||'error') + ')'); setStatus('off','Sin conexión'); return; }
+    if(!acceso){ espera('Este usuario no tiene una caja asignada', 'Pedir a Tesorería que le dé acceso a la página de caja.'); setStatus('off','Sin acceso'); return; }
+    S.cajaAsignada = acceso.caja; S.isOwner = !!acceso.admin;
     S.tab = S.isOwner ? 'resumen' : 'mi';
     await cargar();
   }
