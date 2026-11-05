@@ -198,12 +198,12 @@ footer{font-size:12.5px;color:var(--muted)}
   <!-- Configurar perfil -->
   <section class="panel center" id="v-perfil" hidden aria-labelledby="t-perfil">
     <div class="panel-h"><h2 id="t-perfil">Configurar mi caja</h2><span class="eyebrow">Se hace una sola vez</span></div>
-    <p class="muted" style="margin:0">Cada persona ve solo su caja. Tesorería ve todas.</p>
+    <p class="muted" style="margin:0">Cada persona ve solo su caja. Tesorería Liniers ve todas.</p>
     <form id="form-perfil" novalidate>
       <div class="fields">
         <div class="field full"><label for="p-nombre">Nombre y apellido del responsable</label><input type="text" id="p-nombre" autocomplete="name"></div>
         <div class="field"><label for="p-caja">Caja a cargo</label>
-          <select id="p-caja"><option value="onb">Onboarding</option><option value="retencion">Retención</option><option value="tesoreria">Tesorería</option></select></div>
+          <select id="p-caja"><option value="onb">Onboarding</option><option value="retencion">Retención</option><option value="tesoreria">Tesorería Liniers</option></select></div>
         <div class="field"><label for="p-sucursal">Sucursal</label><input type="text" id="p-sucursal" value="Liniers"></div>
       </div>
       <div id="perfil-msg" hidden></div>
@@ -310,14 +310,14 @@ footer{font-size:12.5px;color:var(--muted)}
     </div>
   </div>
 
-  <footer>Cada pase queda pendiente hasta que Tesorería cuenta el efectivo y lo marca «Recibido». Si lo contado no coincide con el sistema, queda registrado el faltante o sobrante. Si se anula un pase, sus ventas vuelven a la caja de origen.</footer>
+  <footer>Cada pase queda pendiente hasta que Tesorería Liniers cuenta el efectivo y lo marca «Recibido». Si lo contado no coincide con el sistema, queda registrado el faltante o sobrante. Si se anula un pase, sus ventas vuelven a la caja de origen.</footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
-  const CAJAS = {tesoreria:'Tesorería', onb:'Onboarding', retencion:'Retención', principal:'Tesorería principal'};
+  const CAJAS = {tesoreria:'Tesorería Liniers', onb:'Onboarding', retencion:'Retención', principal:'Tesorería Caseros (Principal)'};
   const MON = {
     ARS:{nombre:'Pesos', letras:'pesos', sym:'$', denoms:[20000,10000,2000,1000,500,200,100]},
     USD:{nombre:'Dólares', letras:'dólares estadounidenses', sym:'US$', denoms:[100,50,20,10,5,2,1]}
@@ -390,7 +390,7 @@ footer{font-size:12.5px;color:var(--muted)}
           .forEach(m => { const e = ent(m.owner); (m.estado==='anulada' ? e.anul : e.mov).push(m); });
         pases.map(paseFromRow).forEach(p => ent(p.uidCaja).pases.push(p));
         S.cajas = nuevo; S.perfil = nuevo[S.uid].perfil;
-        setStatus('on', S.isOwner ? 'Conectado · vista de Tesorería' : 'Conectado');
+        setStatus('on', S.isOwner ? 'Conectado · vista de Tesorería Liniers' : 'Conectado');
       }catch(e){ setStatus('off', 'No se pudieron cargar los datos: ' + (e.message || 'error de conexión')); if(S.perfil===undefined) espera('No se pudieron cargar los datos', 'Revisar la conexión y recargar la página.'); }
       render();
     })();
@@ -736,7 +736,7 @@ footer{font-size:12.5px;color:var(--muted)}
   const emptyRow = (cols, t, d) => '<tr><td colspan="'+cols+'"><div class="empty"><strong>'+t+'</strong><span>'+d+'</span></div></td></tr>';
   function rowsMov(e, editable){
     const items = enCaja(e);
-    if(!items.length) return emptyRow(editable?6:5, 'No hay efectivo en caja', editable ? (esTesoreriaPropia(e) ? 'Las ventas que cargue y los pases que reciba aparecen acá hasta que los entregue a la Tesorería principal.' : 'Las ventas que se carguen aparecen acá hasta que se pasa la caja.') : 'El responsable todavía no cargó ventas, o ya pasó todo.');
+    if(!items.length) return emptyRow(editable?6:5, 'No hay efectivo en caja', editable ? (esTesoreriaPropia(e) ? 'Las ventas que cargue y los pases que reciba aparecen acá hasta que los entregue a la Tesorería Caseros (Principal).' : 'Las ventas que se carguen aparecen acá hasta que se pasa la caja.') : 'El responsable todavía no cargó ventas, o ya pasó todo.');
     return items.map(m => {
       let act = '';
       if(editable && m.tipo==='pase') act = '<td class="amt"><span class="pill recibido">Pase recibido</span></td>';
@@ -758,7 +758,7 @@ footer{font-size:12.5px;color:var(--muted)}
   function setAlerta(id, e, propia){
     const el = $(id); const on = e.perfil && superaLimite(e); el.hidden = !on; if(!on) return;
     el.className = 'msg alerta';
-    el.textContent = (propia ? 'Su caja tiene ' : 'La caja '+CAJAS[e.perfil.caja]+' tiene ') + fmt(tot(enCaja(e)).ARS,'ARS') + ' en efectivo y superó el límite de ' + fmt(LIMITE_ARS,'ARS') + '. ' + (e.perfil.caja!=='tesoreria' ? 'Conviene hacer el pase a Tesorería.' : 'Conviene hacer la entrega a la Tesorería principal.');
+    el.textContent = (propia ? 'Su caja tiene ' : 'La caja '+CAJAS[e.perfil.caja]+' tiene ') + fmt(tot(enCaja(e)).ARS,'ARS') + ' en efectivo y superó el límite de ' + fmt(LIMITE_ARS,'ARS') + '. ' + (e.perfil.caja!=='tesoreria' ? 'Conviene hacer el pase a Tesorería Liniers.' : 'Conviene hacer la entrega a la Tesorería Caseros (Principal).');
   }
   const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
   function renderBusqueda(){
@@ -797,7 +797,7 @@ footer{font-size:12.5px;color:var(--muted)}
     const sel = $('x-destino'); const prev = sel.value;
     const tes = p.caja==='tesoreria';
     const opts = tes ? ['principal'] : ['tesoreria'];
-    $('t-pase').textContent = tes ? 'Entregar a Tesorería principal' : 'Pasar caja';
+    $('t-pase').textContent = tes ? 'Entregar a Tesorería Caseros' : 'Pasar caja';
     document.querySelector('label[for="x-corte"]').textContent = tes ? 'Entregar lo que hay en caja hasta el día' : 'Pasar las ventas hasta el día';
     $('btn-pase').textContent = (tes ? 'Registrar entrega' : 'Pasar caja') + (S.dl ? ' y descargar comprobante' : '');
     $('t-mov').textContent = tes ? 'Efectivo en caja' : 'Ventas en caja';
@@ -855,10 +855,11 @@ footer{font-size:12.5px;color:var(--muted)}
       $('v-login').hidden=true; $('v-espera').hidden=true; $('v-app').hidden=true; $('v-perfil').hidden=false;
       $('perfil-cancel').hidden = !S.editando;
       $('p-caja').value = S.cajaAsignada; $('p-caja').disabled = true;
+      if(S.perfil===null && !$('p-nombre').value && S.nombreAsignado) $('p-nombre').value = S.nombreAsignado;
       return;
     }
     $('v-login').hidden=true; $('v-espera').hidden=true; $('v-perfil').hidden=true; $('v-app').hidden=false;
-    $('sub').textContent = S.isOwner ? 'Vista de Tesorería: se ven todas las cajas, los pases por recibir y la caja propia, en pesos y en dólares.' : 'Cada responsable ve solo su caja. Se cargan las ventas en pesos o dólares y, cuando se decide, se pasa todo el efectivo a otra caja con un comprobante para firmar.';
+    $('sub').textContent = S.isOwner ? 'Vista de Tesorería Liniers: se ven todas las cajas, los pases por recibir y la caja propia, en pesos y en dólares.' : 'Cada responsable ve solo su caja. Se cargan las ventas en pesos o dólares y, cuando se decide, se pasa todo el efectivo a otra caja con un comprobante para firmar.';
     renderTabs();
     const tab = S.isOwner ? S.tab : 'mi';
     $('p-resumen').hidden = tab!=='resumen'; $('p-mi').hidden = tab!=='mi'; $('p-otra').hidden = !tab.startsWith('u:');
@@ -883,10 +884,10 @@ footer{font-size:12.5px;color:var(--muted)}
     S.uid = uid; S.perfil = undefined; S.cajas = {};
     espera('Cargando su caja…', 'Un momento.'); $('btn-salir').hidden = false;
     let acceso = null;
-    try{ acceso = chk(await sb.from('caja_usuarios').select('caja,admin').eq('user_id', uid).maybeSingle()); }
+    try{ acceso = chk(await sb.from('caja_usuarios').select('caja,admin,responsable').eq('user_id', uid).maybeSingle()); }
     catch(e){ espera('No se pudo verificar el acceso', 'Revisar la conexión y recargar la página. (' + (e.message||'error') + ')'); setStatus('off','Sin conexión'); return; }
-    if(!acceso){ espera('Este usuario no tiene una caja asignada', 'Pedir a Tesorería que le dé acceso a la página de caja.'); setStatus('off','Sin acceso'); return; }
-    S.cajaAsignada = acceso.caja; S.isOwner = !!acceso.admin;
+    if(!acceso){ espera('Este usuario no tiene una caja asignada', 'Pedir a Tesorería Liniers que le dé acceso a la página de caja.'); setStatus('off','Sin acceso'); return; }
+    S.cajaAsignada = acceso.caja; S.isOwner = !!acceso.admin; S.nombreAsignado = acceso.responsable || '';
     S.tab = S.isOwner ? 'resumen' : 'mi';
     await cargar();
   }
