@@ -166,6 +166,20 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outli
 .checks{display:flex;gap:18px;flex-wrap:wrap}
 .checks label{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
 .checks input{width:auto;accent-color:var(--accent)}
+.elegir{border:1px solid var(--line-2);border-radius:var(--r);max-height:260px;overflow-y:auto;background:var(--surface)}
+.elegir label{font-weight:400;color:var(--ink);display:grid;grid-template-columns:auto 74px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 10px;font-size:13.5px;cursor:pointer}
+.elegir label + label{border-top:1px solid var(--line)}
+.elegir label:hover{background:var(--accent-soft)}
+.elegir label.on{background:var(--accent-soft)}
+.elegir input{width:auto;accent-color:var(--accent);margin:0}
+.elegir .cli{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.elegir .cli small{color:var(--muted);margin-left:6px}
+.elegir .vacio{padding:12px;color:var(--muted);font-size:13px}
+tr.det > td{background:var(--head)!important;padding:0 10px 10px}
+table.mini{min-width:0;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+table.mini th{background:var(--surface);font-size:12px;padding:5px 8px}
+table.mini td{padding:5px 8px;background:var(--surface)!important}
+.det-h{font-size:12.5px;color:var(--muted);padding:8px 0 6px}
 .sumline{font-size:13.5px;display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:var(--r);background:var(--head);border:1px solid var(--line);flex-wrap:wrap}
 .sumline b{font-weight:700}
 .sumline .tot{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
@@ -369,12 +383,14 @@ details.anuladas .tablewrap{margin-top:8px}
           </section>
 
           <section class="panel" aria-labelledby="t-pase">
-            <div class="panel-h"><h2 id="t-pase">Pasar caja</h2><span class="eyebrow">Todo lo cargado hasta un día</span></div>
+            <div class="panel-h"><h2 id="t-pase">Pasar caja</h2><span class="eyebrow">Queda pendiente hasta que se cuente</span></div>
             <form id="form-pase" novalidate>
               <div class="fields">
-                <div class="field"><label for="x-corte">Pasar las ventas hasta el día</label><input type="date" id="x-corte"></div>
+                <div class="field full"><span class="lbl" id="x-modo-lbl">Qué se pasa</span><div class="checks" role="radiogroup" aria-labelledby="x-modo-lbl"><label for="x-modo-todo"><input type="radio" name="x-modo" id="x-modo-todo" value="todo" checked> Todo lo cargado hasta un día</label><label for="x-modo-elegir"><input type="radio" name="x-modo" id="x-modo-elegir" value="elegir"> Solo los pagos que elija</label></div></div>
+                <div class="field full" id="x-lista-f" hidden><span class="lbl">Pagos a pasar</span><div class="elegir" id="x-lista"></div></div>
+                <div class="field" id="x-corte-f"><label for="x-corte">Pasar las ventas hasta el día</label><input type="date" id="x-corte"></div>
                 <div class="field"><label for="x-destino">Caja que recibe</label><select id="x-destino"></select></div>
-                <div class="field full"><span class="lbl">Monedas a pasar</span><div class="checks"><label for="x-ars"><input type="checkbox" id="x-ars" checked> Pesos</label><label for="x-usd"><input type="checkbox" id="x-usd" checked> Dólares</label></div></div>
+                <div class="field full" id="x-mon-f"><span class="lbl">Monedas a pasar</span><div class="checks"><label for="x-ars"><input type="checkbox" id="x-ars" checked> Pesos</label><label for="x-usd"><input type="checkbox" id="x-usd" checked> Dólares</label></div></div>
                 <div class="sumline full" id="x-sum"></div>
                 <div class="field full"><label for="x-nombre">A nombre de</label><input type="text" id="x-nombre" list="dl-personas" placeholder="Persona a cuyo nombre se hace el pase"></div>
                 <div class="field full"><label for="x-recibe">Responsable que recibe</label><input type="text" id="x-recibe" list="dl-personas" placeholder="Firma en el comprobante"></div>
@@ -454,7 +470,7 @@ details.anuladas .tablewrap{margin-top:8px}
   };
   const MONS = ['ARS','USD'];
   const $ = id => document.getElementById(id);
-  const S = { db:null, dl:null, uid:null, isOwner:false, perfil:undefined, cajas:{}, tab:'mi', conf:null, editando:false, conteo:{}, focusId:null, difOk:null, motivo:'' };
+  const S = { elegidas:new Set(), detalle:new Set(), db:null, dl:null, uid:null, isOwner:false, perfil:undefined, cajas:{}, tab:'mi', conf:null, editando:false, conteo:{}, focusId:null, difOk:null, motivo:'' };
 
   /* ---------- formato ---------- */
   const fmt = (n, mon) => MON[mon||'ARS'].sym + ' ' + (Number(n)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -570,7 +586,9 @@ details.anuladas .tablewrap{margin-top:8px}
     y += 13;
     const n = (p.movimientos||[]).length;
     const ent = p.destino==='principal';
-    lv((ent?'Movimientos hasta el ':'Ventas hasta el ') + fdate(p.corte), n + (ent ? (n===1?' movimiento':' movimientos') : (n===1?' venta':' ventas')) + (p.desde ? ' (desde ' + fdate(p.desde) + ')' : ''), L, y);
+    const palabra = ent ? (n===1?' movimiento':' movimientos') : (n===1?' venta':' ventas');
+    if(p.modo==='elegir') lv(ent ? 'Movimientos elegidos' : 'Pagos elegidos', n + palabra + (p.desde && p.desde!==p.corte ? ' (' + fdate(p.desde) + ' al ' + fdate(p.corte) + ')' : ' (' + fdate(p.corte) + ')'), L, y);
+    else lv((ent?'Movimientos hasta el ':'Ventas hasta el ') + fdate(p.corte), n + palabra + (p.desde ? ' (desde ' + fdate(p.desde) + ')' : ''), L, y);
     lv('Queda en caja que entrega', fmtTot(p.queda||{}, ' / '), L+62, y);
     lv('A nombre de', p.nombre, L+124, y, 54);
     y += 12;
@@ -705,12 +723,39 @@ details.anuladas .tablewrap{margin-top:8px}
     catch(e){ msg($('venta-msg'),'err',errTxt(e)); }
   });
 
+  const modoPase = () => $('x-modo-elegir').checked ? 'elegir' : 'todo';
+  function renderLista(){
+    const elegir = modoPase()==='elegir';
+    $('x-lista-f').hidden = !elegir; $('x-corte-f').hidden = elegir; $('x-mon-f').hidden = elegir;
+    if(!elegir) return;
+    const mov = enCaja(mia()).slice().sort((a,b) => (a.fecha||'').localeCompare(b.fecha||''));
+    const ids = new Set(mov.map(m => m.id)); [...S.elegidas].forEach(id => { if(!ids.has(id)) S.elegidas.delete(id); });
+    $('x-lista').innerHTML = mov.length ? mov.map(m => {
+      const on = S.elegidas.has(m.id);
+      return '<label class="'+(on?'on':'')+'"><input type="checkbox" data-elegir="'+esc(m.id)+'"'+(on?' checked':'')+'>'+
+        '<span class="num">'+fdate(m.fecha)+'</span><span class="cli">'+esc(m.cliente)+'<small>'+esc([m.concepto, m.recibo].filter(Boolean).join(' · '))+'</small></span>'+
+        '<span class="num">'+fmt(m.monto, monOf(m))+'</span></label>';
+    }).join('') : '<div class="vacio">No hay pagos en caja para elegir.</div>';
+  }
+  $('x-lista').addEventListener('change', ev => {
+    const c = ev.target.closest('[data-elegir]'); if(!c) return;
+    if(c.checked) S.elegidas.add(c.dataset.elegir); else S.elegidas.delete(c.dataset.elegir);
+    c.closest('label').classList.toggle('on', c.checked); renderPaseSum();
+  });
+  ['x-modo-todo','x-modo-elegir'].forEach(id => $(id).addEventListener('change', () => { renderLista(); renderPaseSum(); }));
   function seleccion(){
-    const corte = $('x-corte').value; const mov = enCaja(mia());
+    const mov = enCaja(mia());
+    if(modoPase()==='elegir'){
+      const sel = mov.filter(m => S.elegidas.has(m.id));
+      const ids = new Set(sel.map(m => m.id));
+      const fechas = sel.map(m => m.fecha||'').sort();
+      return {sel, mons:MONS.filter(k => sel.some(m => monOf(m)===k)), totales:tot(sel), queda:tot(mov.filter(m => !ids.has(m.id))), corte:fechas[fechas.length-1] || todayISO(), modo:'elegir'};
+    }
+    const corte = $('x-corte').value;
     const mons = MONS.filter(k => $(k==='ARS'?'x-ars':'x-usd').checked);
     const sel = corte ? mov.filter(m => (m.fecha||'') <= corte && mons.includes(monOf(m))) : [];
     const ids = new Set(sel.map(m => m.id));
-    return {sel, mons, totales:tot(sel), queda:tot(mov.filter(m => !ids.has(m.id))), corte};
+    return {sel, mons, totales:tot(sel), queda:tot(mov.filter(m => !ids.has(m.id))), corte, modo:'todo'};
   }
   function renderPaseSum(){
     const {sel, totales} = seleccion();
@@ -727,16 +772,20 @@ details.anuladas .tablewrap{margin-top:8px}
   $('form-pase').addEventListener('change', renderPaseSum);
   $('form-pase').addEventListener('submit', async ev => {
     ev.preventDefault();
-    const perfil = S.perfil; const {sel, mons, totales, queda, corte} = seleccion();
+    const perfil = S.perfil; const {sel, mons, totales, queda, corte, modo} = seleccion();
     const destino = $('x-destino').value; const nombre = $('x-nombre').value.trim(); const recibe = $('x-recibe').value.trim(); const des = getDesglose();
-    if(!corte) return msg($('pase-msg'),'err','Falta el día hasta el que se pasan las ventas.');
-    if(!mons.length) return msg($('pase-msg'),'err','Elegir al menos una moneda para pasar.');
-    if(!sel.length) return msg($('pase-msg'),'err','No hay efectivo en caja hasta ese día en la moneda elegida.');
+    if(modo==='elegir'){
+      if(!sel.length) return msg($('pase-msg'),'err','Marcar al menos un pago de la lista para pasar.');
+    } else {
+      if(!corte) return msg($('pase-msg'),'err','Falta el día hasta el que se pasan las ventas.');
+      if(!mons.length) return msg($('pase-msg'),'err','Elegir al menos una moneda para pasar.');
+      if(!sel.length) return msg($('pase-msg'),'err','No hay efectivo en caja hasta ese día en la moneda elegida.');
+    }
     if(!nombre) return msg($('pase-msg'),'err','Falta indicar a nombre de quién se hace el pase.');
     if(!recibe) return msg($('pase-msg'),'err','Falta el responsable que recibe.');
     for(const k of MONS){ const dt = desgTotal(des[k]); if(dt>0 && Math.abs(dt-totales[k])>0.009) return msg($('pase-msg'),'err','El detalle de billetes en '+MON[k].nombre.toLowerCase()+' suma '+fmt(dt,k)+' y no coincide con el total del pase ('+fmt(totales[k],k)+').'); }
     const fechas = sel.map(m=>m.fecha).sort();
-    const p = {numero:genNumero(), fecha:todayISO(), corte, desde:fechas[0], origen:perfil.caja, destino, sucursal:perfil.sucursal, totales, queda,
+    const p = {numero:genNumero(), fecha:todayISO(), corte, desde:fechas[0], modo, origen:perfil.caja, destino, sucursal:perfil.sucursal, totales, queda,
       nombre, entrega:perfil.responsable, recibe, concepto:$('x-obs').value.trim(), desglose:des, estado:'pendiente', createdAt:new Date().toISOString(), origenUid:S.uid,
       movimientos: sel.map(m => Object.assign({id:m.id, fecha:m.fecha, cliente:m.cliente, concepto:m.concepto||'', recibo:m.recibo||'', moneda:monOf(m), monto:m.monto}, m.tipo==='pase' ? {tipo:'pase', srcUid:m.srcUid, srcNumero:m.srcNumero} : {}))};
     $('btn-pase').disabled = true;
@@ -751,6 +800,7 @@ details.anuladas .tablewrap{margin-top:8px}
     $('btn-pase').disabled = false;
     msg($('pase-msg'),'ok',(destino==='principal'?'Entrega ':'Pase ')+p.numero+' por '+fmtTot(totales)+' registrada. Imprimir el comprobante y firmarlo entre quien entrega y quien recibe.');
     ['x-nombre','x-obs'].forEach(id => $(id).value=''); clearDesglose();
+    S.elegidas.clear(); $('x-modo-todo').checked = true; renderLista(); renderPaseSum();
     await descargar(p, $('pase-msg'));
   });
 
@@ -794,6 +844,13 @@ details.anuladas .tablewrap{margin-top:8px}
     const msgEl = $(curTab==='mi' ? 'mi-pases-msg' : curTab.startsWith('u:') ? 'o-msg' : 'res-msg');
     if(a==='tab'){ S.tab = b.dataset.tab; S.conf=null; render(); try{ window.scrollTo(0,0); }catch(_){} return; }
     if(a==='ir-pend'){ const t = $('t-porrecibir'); if(t && t.scrollIntoView) t.scrollIntoView({block:'start', behavior:'smooth'}); return; }
+    if(a==='detalle'){ const k = uid+'|'+id; if(S.detalle.has(k)) S.detalle.delete(k); else S.detalle.add(k); render(); return; }
+    if(a==='solo'){
+      $('x-modo-elegir').checked = true; S.elegidas = new Set([id]); renderLista(); renderPaseSum();
+      const t = $('t-pase'); if(t && t.scrollIntoView) t.scrollIntoView({block:'start', behavior:'smooth'});
+      setTimeout(() => { try{ $('x-nombre').focus({preventScroll:true}); }catch(_){} }, 300);
+      return;
+    }
     if(a==='pdf'){ const p = (S.cajas[uid]||{pases:[]}).pases.find(x => x.numero===id); if(p) descargar(p, msgEl); return; }
     if(a==='recibir' || a==='anular' || a==='anularv'){
       S.conf = {key:uid+'|'+id, accion:a}; S.motivo=''; S.conteo={}; S.difOk=null; msgEl.hidden=true;
@@ -827,7 +884,9 @@ details.anuladas .tablewrap{margin-top:8px}
   function rowPase(p){
     const uid = p.uidCaja; const key = uid+'|'+p.numero; const conf = S.conf && S.conf.key===key;
     const puedeAnular = S.isOwner || uid===S.uid;
-    let acts = '<button type="button" class="small" data-act="pdf" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Comprobante PDF</button>';
+    const nMov = (p.movimientos||[]).length, abierto = S.detalle.has(key);
+    let acts = '<button type="button" class="small" data-act="detalle" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'" aria-expanded="'+abierto+'">'+(abierto?'Ocultar detalle':'Ver detalle ('+nMov+')')+'</button>'+
+      '<button type="button" class="small" data-act="pdf" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Comprobante PDF</button>';
     if(p.estado==='pendiente'){
       if(conf && S.conf.accion==='recibir'){
         const mons = MONS.filter(k => (p.totales||{})[k] > 0);
@@ -844,10 +903,18 @@ details.anuladas .tablewrap{margin-top:8px}
       : p.estado==='anulado' ? '<span class="pill anulado">Anulado</span>' : '<span class="pill pendiente">Pendiente</span>';
     const n = (p.movimientos||[]).length;
     return '<tr class="'+esc(p.estado)+'"><td><span class="num">'+esc(p.numero)+'</span><span class="sub">'+fdate(p.fecha)+'</span></td>'+
-      '<td>'+esc(CAJAS[p.origen])+' → '+esc(CAJAS[p.destino])+'<span class="sub">'+n+(n===1?' venta':' ventas')+' hasta el '+fdate(p.corte)+'</span></td>'+
+      '<td>'+esc(CAJAS[p.origen])+' → '+esc(CAJAS[p.destino])+'<span class="sub">'+n+(n===1?' venta':' ventas')+(p.modo==='elegir' ? (n===1?' elegida':' elegidas') : ' hasta el '+fdate(p.corte))+'</span></td>'+
       '<td>'+esc(p.nombre)+(p.concepto?'<span class="sub">'+esc(p.concepto)+'</span>':'')+'</td>'+
       '<td>'+esc(p.entrega)+'<span class="sub">recibe '+esc(p.recibe)+'</span></td>'+
-      '<td class="amt">'+totHTML(p.totales||{})+'</td><td>'+estado+'</td><td><div class="rowact">'+acts+'</div></td></tr>';
+      '<td class="amt">'+totHTML(p.totales||{})+'</td><td>'+estado+'</td><td><div class="rowact">'+acts+'</div></td></tr>'+
+      (abierto ? detallePase(p) : '');
+  }
+  function detallePase(p){
+    const movs = (p.movimientos||[]).slice().sort((a,b) => monOf(a).localeCompare(monOf(b)) || (a.fecha||'').localeCompare(b.fecha||''));
+    const t = p.totales||{};
+    return '<tr class="det"><td colspan="7"><div class="det-h">Qué se pasó en '+esc(p.numero)+'</div><div class="tablewrap" style="border:0"><table class="mini"><thead><tr><th>Fecha</th><th>Cliente</th><th>Concepto</th><th>Recibo</th><th class="amt">Monto</th></tr></thead><tbody>'+
+      movs.map(m => '<tr><td>'+fdate(m.fecha)+'</td><td>'+esc(m.cliente)+'</td><td>'+esc(m.concepto||'—')+'</td><td>'+esc(m.recibo||'—')+'</td><td class="amt">'+fmt(m.monto, monOf(m))+'</td></tr>').join('')+
+      '</tbody><tfoot>'+MONS.filter(k => t[k]>0).map(k => '<tr><td colspan="4">Total '+MON[k].nombre.toLowerCase()+'</td><td class="amt">'+fmt(t[k],k)+'</td></tr>').join('')+'</tfoot></table></div></td></tr>';
   }
   const isoLocal = ts => { const d = new Date(ts||Date.now()); return new Date(d - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
   const esTesoreriaPropia = e => S.isOwner && e && e.uid===S.uid && S.perfil && S.perfil.caja==='tesoreria';
@@ -870,8 +937,9 @@ details.anuladas .tablewrap{margin-top:8px}
     if(!items.length) return emptyRow(editable?6:5, 'No hay efectivo en caja', editable ? (esTesoreriaPropia(e) ? 'Las ventas que cargue y los pases que reciba aparecen acá hasta que los entregue a la Tesorería Caseros (Principal).' : 'Las ventas que se carguen aparecen acá hasta que se pasa la caja.') : 'El responsable todavía no cargó ventas, o ya pasó todo.');
     return items.map(m => {
       let act = '';
-      if(editable && m.tipo==='pase') act = '<td class="amt"><span class="pill recibido">Pase recibido</span></td>';
-      else if(editable){ const conf = S.conf && S.conf.key===e.uid+'|'+m.id; act = '<td class="amt">'+(conf ? '<span class="confirmbox"><input type="text" id="motivo-input" class="motivo" placeholder="Motivo de la anulación" value="'+esc(S.motivo||'')+'" aria-label="Motivo de la anulación"><button type="button" class="small primary" data-act="si" data-uid="'+esc(e.uid)+'" data-id="'+esc(m.id)+'">Anular</button><button type="button" class="small" data-act="no">No</button></span>' : '<button type="button" class="small link" data-act="anularv" data-uid="'+esc(e.uid)+'" data-id="'+esc(m.id)+'">Anular</button>')+'</td>'; }
+      const solo = editable ? '<button type="button" class="small" data-act="solo" data-id="'+esc(m.id)+'">'+(esTesoreriaPropia(e) ? 'Entregar solo este' : 'Pasar solo este')+'</button>' : '';
+      if(editable && m.tipo==='pase') act = '<td class="amt"><div class="rowact"><span class="pill recibido">Pase recibido</span>'+solo+'</div></td>';
+      else if(editable){ const conf = S.conf && S.conf.key===e.uid+'|'+m.id; act = '<td class="amt">'+(conf ? '<span class="confirmbox"><input type="text" id="motivo-input" class="motivo" placeholder="Motivo de la anulación" value="'+esc(S.motivo||'')+'" aria-label="Motivo de la anulación"><button type="button" class="small primary" data-act="si" data-uid="'+esc(e.uid)+'" data-id="'+esc(m.id)+'">Anular</button><button type="button" class="small" data-act="no">No</button></span>' : '<div class="rowact">'+solo+'<button type="button" class="small link" data-act="anularv" data-uid="'+esc(e.uid)+'" data-id="'+esc(m.id)+'">Anular</button></div>')+'</td>'; }
       return '<tr><td class="num">'+fdate(m.fecha)+'</td><td>'+esc(m.cliente)+'</td><td>'+esc(m.concepto||'—')+'</td><td>'+esc(m.recibo||'—')+'</td><td class="amt num">'+fmt(m.monto, monOf(m))+'</td>'+act+'</tr>';
     }).join('');
   }
@@ -932,6 +1000,9 @@ details.anuladas .tablewrap{margin-top:8px}
     document.querySelector('label[for="x-corte"]').textContent = tes ? 'Entregar lo que hay en caja hasta el día' : 'Pasar las ventas hasta el día';
     $('btn-pase').textContent = (tes ? 'Registrar entrega' : 'Pasar caja') + (S.dl ? ' y descargar comprobante' : '');
     $('t-mov').textContent = tes ? 'Efectivo en caja' : 'Ventas en caja';
+    $('x-modo-todo').nextSibling.textContent = tes ? ' Todo lo que hay en caja hasta un día' : ' Todo lo cargado hasta un día';
+    $('x-modo-elegir').nextSibling.textContent = tes ? ' Solo los movimientos que elija' : ' Solo los pagos que elija';
+    renderLista();
     if(sel.dataset.k !== opts.join()){ sel.innerHTML = opts.map(k => '<option value="'+k+'">'+CAJAS[k]+'</option>').join(''); sel.dataset.k = opts.join(); sel.value = opts.includes(prev) ? prev : (opts.includes('tesoreria') ? 'tesoreria' : opts[0]); }
     $('mi-mov').innerHTML = rowsMov(e, true); $('mi-mov-f').innerHTML = footMov(e, true); renderAnul('mi', e); setAlerta('mi-alerta', Object.assign({}, e, {perfil:p}), true);
     $('mi-pases').innerHTML = e.pases.length ? e.pases.map(x => rowPase(x)).join('') : emptyRow(7,'Todavía no hay pases','Cuando se pasa la caja, el pase queda acá con su estado y su comprobante.');
