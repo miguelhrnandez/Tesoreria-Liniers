@@ -374,7 +374,7 @@ details.anuladas .tablewrap{margin-top:8px}
                 <div class="field"><label for="v-fecha">Fecha</label><input type="date" id="v-fecha"></div>
                 <div class="field"><label for="v-monto">Monto</label><div class="moneyrow"><select id="v-moneda" aria-label="Moneda"><option value="ARS">Pesos</option><option value="USD">Dólares</option></select><input type="text" inputmode="decimal" class="money" id="v-monto" placeholder="0,00"></div></div>
                 <div class="field full"><label for="v-cliente">Cliente</label><input type="text" id="v-cliente" placeholder="Nombre y apellido"></div>
-                <div class="field"><label for="v-concepto">Concepto</label><select id="v-concepto"><option value="">Elegir…</option><option value="Ahorro">Ahorro</option><option value="Venta">Venta</option><option value="Incremento">Incremento</option><option value="Cuota">Cuota</option></select></div>
+                <div class="field"><label for="v-concepto">Concepto</label><select id="v-concepto"><option value="">Elegir…</option><option value="Ahorro">Ahorro</option><option value="Venta">Venta</option><option value="Incremento">Incremento</option><option value="Cuota">Cuota</option><option value="Reserva">Reserva</option></select></div>
                 <div class="field"><label for="v-recibo">N° de recibo</label><input type="text" id="v-recibo" placeholder="Opcional"></div>
               </div>
               <div id="venta-msg" hidden></div>
@@ -697,6 +697,17 @@ details.anuladas .tablewrap{margin-top:8px}
     S.editando = true; const p = S.perfil||{}; $('p-nombre').value = p.responsable||''; $('p-caja').value = S.cajaAsignada; $('p-sucursal').value = p.sucursal||'Liniers'; render();
   });
 
+  // Todas las ventas cargadas en la caja que siguen vigentes: en caja o dentro de un pase no anulado.
+  function ventasVigentes(e){
+    const out = e.mov.filter(m => m.tipo!=='pase');
+    e.pases.forEach(p => { if(p.estado!=='anulado') (p.movimientos||[]).forEach(m => { if(m.tipo!=='pase') out.push(m); }); });
+    return out;
+  }
+  const normCli = t => String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+  function ventaParecida(e, v){
+    const c = normCli(v.cliente);
+    return ventasVigentes(e).find(m => normCli(m.cliente)===c && monOf(m)===v.moneda && Math.abs((Number(m.monto)||0) - v.monto) < 0.005 && (m.fecha||'')===v.fecha) || null;
+  }
   function reciboExistente(e, key){
     const norm = r => String(r||'').toUpperCase().replace(/\s+/g,'');
     const enCaja = e.mov.find(m => norm(m.recibo)===key); if(enCaja) return enCaja;
@@ -711,12 +722,20 @@ details.anuladas .tablewrap{margin-top:8px}
     const m = {fecha:$('v-fecha').value, cliente:$('v-cliente').value.trim(), concepto:$('v-concepto').value.trim(), recibo:$('v-recibo').value.trim(), moneda:$('v-moneda').value, monto:parseAR($('v-monto').value), estado:'en_caja', createdAt:new Date().toISOString()};
     if(!m.fecha) return msg($('venta-msg'),'err','Falta la fecha.');
     if(!m.cliente) return msg($('venta-msg'),'err','Falta el nombre del cliente.');
-    if(!m.concepto) return msg($('venta-msg'),'err','Falta elegir el concepto: ahorro, venta, incremento o cuota.');
+    if(!m.concepto) return msg($('venta-msg'),'err','Falta elegir el concepto: ahorro, venta, incremento, cuota o reserva.');
     if(m.monto<=0) return msg($('venta-msg'),'err','El monto tiene que ser mayor a cero.');
     if(m.recibo){
       const key = m.recibo.toUpperCase().replace(/\s+/g,'');
       const dup = reciboExistente(mia(), key);
-      if(dup && S.dupOk !== key){ S.dupOk = key; return msg($('venta-msg'),'info','El recibo '+m.recibo+' ya está cargado en esta caja ('+dup.cliente+', '+fdate(dup.fecha)+', '+fmt(dup.monto, monOf(dup))+'). Si es correcto, tocar «Cargar venta» otra vez para guardarla igual.'); }
+      if(dup && S.dupOk !== 'r|'+key){ S.dupOk = 'r|'+key; return msg($('venta-msg'),'info','El recibo '+m.recibo+' ya está cargado en esta caja ('+dup.cliente+', '+fdate(dup.fecha)+', '+fmt(dup.monto, monOf(dup))+'). Si es correcto, tocar «Cargar venta» otra vez para guardarla igual.'); }
+    }
+    if(!m.recibo || S.dupOk !== 'r|'+m.recibo.toUpperCase().replace(/\s+/g,'')){
+      const igual = ventaParecida(mia(), m);
+      const clave = 'v|'+normCli(m.cliente)+'|'+m.moneda+'|'+m.monto+'|'+m.fecha;
+      if(igual && S.dupOk !== clave){
+        S.dupOk = clave;
+        return msg($('venta-msg'),'info','Ya hay una venta igual cargada: '+igual.cliente+', '+fmt(igual.monto, monOf(igual))+', '+(igual.concepto||'sin concepto')+', del '+fdate(igual.fecha)+(igual.recibo?' (recibo '+igual.recibo+')':'')+'. Si es otro pago, tocar «Cargar venta» otra vez para guardarla igual.');
+      }
     }
     S.dupOk = null;
     try{ const {estado, ...dataMov} = m; chk(await sb.from('caja_movimientos').insert({owner:S.uid, estado:'en_caja', data:dataMov})); await cargar(); msg($('venta-msg'),'ok','Venta de '+m.cliente+' por '+fmt(m.monto, m.moneda)+' cargada.'); ['v-cliente','v-recibo','v-monto'].forEach(id => $(id).value=''); $('v-cliente').focus(); }
