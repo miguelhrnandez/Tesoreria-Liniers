@@ -212,6 +212,38 @@ details.llevar-pase .sub-row .m{text-align:right;white-space:nowrap}
 details.llevar-pase .nota{padding:4px 10px 6px 26px;font-size:12px;color:var(--warn);background:var(--head)}
 .llevar-tot{display:flex;justify-content:space-between;gap:8px;padding:7px 10px;border-top:1px solid var(--line-2);background:var(--head);font-size:13px;font-weight:700}
 .llevar-tot span:last-child{text-align:right}
+.cp-filtros{max-width:100%;flex-wrap:wrap}
+.cp-filtros button{flex:none;padding:4px 10px}
+.cp-filtros button[aria-pressed="true"] .muted{color:inherit;opacity:.8}
+.cp-grupo + .cp-grupo{border-top:1px solid var(--line-2)}
+.cp-armar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;background:var(--accent-soft);border-bottom:1px solid var(--line)}
+.cp-armar-sum{font-size:13px;color:var(--ink-2);margin-top:2px}
+table.carpetas th.sel, table.carpetas td.sel{width:34px;padding-right:0}
+table.carpetas td.sel input, table.carpetas th.sel input{width:auto;accent-color:var(--accent);margin:0}
+table.carpetas tr.devuelta td{background:color-mix(in srgb, var(--danger-soft) 55%, transparent)!important}
+.cp-grupo-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.cp-grupo-h b{font-weight:700}
+table.carpetas{min-width:1100px}
+table.carpetas td.obs{max-width:220px;white-space:normal;font-size:12.5px;color:var(--ink-2)}
+@media (max-width:640px){
+  .cp-fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .cp-fields .full{grid-column:1/-1}
+  table.wide.carpetas{min-width:0;width:100%}
+  table.carpetas thead{display:none}
+  table.carpetas, table.carpetas tbody, table.carpetas tfoot{display:block}
+  table.carpetas tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding:12px 14px;border-bottom:1px solid var(--line-2)}
+  table.carpetas td{display:block;border:0;padding:0;background:transparent!important;text-align:left}
+  table.carpetas td[data-l]::before{content:attr(data-l);display:block;font-size:11.5px;color:var(--muted)}
+  table.carpetas td.cli,table.carpetas td.obs,table.carpetas td.est,table.carpetas td.acc{grid-column:1/-1}
+  table.carpetas td.sel{grid-column:1/-1;width:auto}
+  table.carpetas td.cli::before{display:none}
+  table.carpetas td.cli b{font-size:15px}
+  table.carpetas td.obs.vacia{display:none}
+  table.carpetas td.acc .rowact{justify-content:flex-start;margin-top:6px}
+  table.carpetas td.acc .confirmbox{justify-content:flex-start}
+  table.carpetas td.acc .motivo{width:100%}
+  table.carpetas tfoot tr{display:flex;justify-content:space-between}
+  table.carpetas tfoot td[colspan="7"]{display:none}
+}
 .sumline{font-size:13.5px;display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:var(--r);background:var(--head);border:1px solid var(--line);flex-wrap:wrap}
 .sumline b{font-weight:700}
 .sumline .tot{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
@@ -454,6 +486,34 @@ details.anuladas .tablewrap{margin-top:8px}
         </section>
       </div>
 
+      <!-- Carpetas -->
+      <div id="p-carpetas" class="view" hidden>
+        <div id="cp-aviso" hidden></div>
+        <section class="panel" id="cp-form-panel" aria-labelledby="t-cp-form" hidden>
+          <div class="panel-h"><h2 id="t-cp-form">Cargar carpeta</h2><span class="eyebrow">Queda en la sucursal hasta la entrega</span></div>
+          <form id="form-carpeta" novalidate>
+            <div class="fields cp-fields">
+              <div class="field"><label for="cp-cliente">Cliente</label><input type="text" id="cp-cliente" placeholder="Nombre y apellido"></div>
+              <div class="field"><label for="cp-concepto">Concepto</label><select id="cp-concepto"></select></div>
+              <div class="field"><label for="cp-efectivo">Efectivo</label><input type="text" inputmode="decimal" class="money" id="cp-efectivo" placeholder="0,00"></div>
+              <div class="field"><label for="cp-transf">Transferencia</label><input type="text" inputmode="decimal" class="money" id="cp-transf" placeholder="0,00"></div>
+              <div class="sumline full" id="cp-total"></div>
+              <div class="field"><label for="cp-asesor">Asesor</label><input type="text" id="cp-asesor" list="dl-asesores"></div>
+              <div class="field"><label for="cp-onb">Onboarder</label><input type="text" id="cp-onb" list="dl-onboarders"></div>
+              <div class="field full"><label for="cp-obs">Observación</label><textarea id="cp-obs" placeholder="Opcional"></textarea></div>
+            </div>
+            <datalist id="dl-asesores"></datalist><datalist id="dl-onboarders"></datalist>
+            <div id="cp-msg" hidden></div>
+            <div class="actions"><button type="submit" class="primary" id="btn-cp">Agregar a la sucursal</button><button type="button" id="cp-cancel" hidden>Cancelar</button></div>
+          </form>
+        </section>
+        <section class="panel flush" aria-labelledby="t-cp-lista">
+          <div class="panel-h"><h2 id="t-cp-lista">Dónde están las carpetas</h2><div class="tema cp-filtros" id="cp-filtros" role="group" aria-label="Filtrar carpetas"></div></div>
+          <div id="cp-lista-msg" hidden style="margin:12px 16px 0"></div>
+          <div id="cp-lista"></div>
+        </section>
+      </div>
+
       <!-- Tesorería Caseros -->
       <div id="p-caseros" class="view" hidden>
         <section class="saldo">
@@ -520,7 +580,7 @@ details.anuladas .tablewrap{margin-top:8px}
   };
   const MONS = ['ARS','USD'];
   const $ = id => document.getElementById(id);
-  const S = { prevOpen:new Set(), elegidas:new Set(), detalle:new Set(), db:null, dl:null, uid:null, isOwner:false, perfil:undefined, cajas:{}, tab:'mi', conf:null, editando:false, conteo:{}, focusId:null, difOk:null, motivo:'' };
+  const S = { carpetas:[], carpetasError:null, cpVista:'', cpSel:new Set(), cpEdit:null, prevOpen:new Set(), elegidas:new Set(), detalle:new Set(), db:null, dl:null, uid:null, isOwner:false, perfil:undefined, cajas:{}, tab:'mi', conf:null, editando:false, conteo:{}, focusId:null, difOk:null, motivo:'' };
 
   /* ---------- formato ---------- */
   const fmt = (n, mon) => MON[mon||'ARS'].sym + ' ' + (Number(n)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -578,7 +638,12 @@ details.anuladas .tablewrap{margin-top:8px}
         let qm = sb.from('caja_movimientos').select('*').in('estado', ['en_caja','anulada']);
         let qx = sb.from('caja_pases').select('*').order('created_at', {ascending:false}).limit(1000);
         if(!S.isOwner){ qp = qp.eq('id', S.uid); qm = qm.eq('owner', S.uid); qx = esCaseros() ? qx.eq('destino','principal') : qx.eq('owner', S.uid); }
-        const [perfiles, movs, pases] = (await Promise.all([qp, qm, qx])).map(chk);
+        // Si la tabla de carpetas todavía no existe o falla, el resto de la página sigue funcionando.
+        const qc = (S.isOwner || esCaseros()) ? Promise.resolve().then(() => sb.from('caja_carpetas').select('*').order('created_at', {ascending:false}).limit(3000)).then(r => r, e => ({data:[], error:e})) : Promise.resolve({data:[], error:null});
+        const [rp, rm, rx, rc] = await Promise.all([qp, qm, qx, qc]);
+        const [perfiles, movs, pases] = [rp, rm, rx].map(chk);
+        S.carpetasError = rc && rc.error ? (rc.error.message || 'error') : null;
+        S.carpetas = (rc && !rc.error ? rc.data : []).map(carpetaFromRow);
         const nuevo = {};
         const ent = uid => (nuevo[uid] = nuevo[uid] || {uid, perfil:null, mov:[], anul:[], pases:[]});
         ent(S.uid);
@@ -959,6 +1024,14 @@ details.anuladas .tablewrap{margin-top:8px}
     const msgEl = $(curTab==='mi' ? 'mi-pases-msg' : curTab==='caseros' ? 'c-msg' : curTab.startsWith('u:') ? 'o-msg' : 'res-msg');
     if(a==='tab'){ S.tab = b.dataset.tab; S.conf=null; render(); try{ window.scrollTo(0,0); }catch(_){} return; }
     if(a==='ir-pend'){ const t = $('t-porrecibir'); if(t && t.scrollIntoView) t.scrollIntoView({block:'start', behavior:'smooth'}); return; }
+    if(a==='cp-vista'){ S.cpVista = id; S.conf = null; render(); return; }
+    if(a==='cp-armar'){ armarEntrega(); return; }
+    if(a==='cp-remito'){ descargarRemito(id); return; }
+    if(a==='cp-ok'){ cpAccion('ok', id); return; }
+    if(a==='cp-editar'){ cpEditar(id); return; }
+    if(a==='cp-rechazar' || a==='cp-anular'){ S.conf = {key:'cp|'+id, accion:a}; S.motivo = ''; S.focusId = a==='cp-rechazar' ? 'motivo-input' : null; render(); return; }
+    if(a==='cp-todas'){ S.conf = {key:'cpg|'+id, accion:a}; render(); return; }
+    if(a==='cp-anular-entrega'){ S.conf = {key:'cpe|'+id, accion:a}; render(); return; }
     if(a==='detalle'){ const k = uid+'|'+id; if(S.detalle.has(k)) S.detalle.delete(k); else S.detalle.add(k); render(); return; }
     if(a==='solo'){
       $('x-modo-elegir').checked = true; S.elegidas = new Set([id]); renderLista(); renderPaseSum();
@@ -976,6 +1049,14 @@ details.anuladas .tablewrap{margin-top:8px}
     if(a==='no'){ S.conf = null; S.focusId = null; S.difOk = null; render(); return; }
     if(a==='si' && S.conf){
       const c = S.conf;
+      if(c.accion==='cp-rechazar'){
+        const motivo = (S.motivo||'').trim();
+        if(!motivo){ const i=$('motivo-input'); if(i){ i.focus(); i.setAttribute('aria-invalid','true'); i.placeholder='El motivo es obligatorio'; } return; }
+        S.conf = null; S.motivo = ''; cpAccion('rechazar', id, motivo); render(); return;
+      }
+      if(c.accion==='cp-anular'){ S.conf = null; cpAccion('anular', id); render(); return; }
+      if(c.accion==='cp-todas'){ S.conf = null; cpAccion('todas', id); render(); return; }
+      if(c.accion==='cp-anular-entrega'){ S.conf = null; cpAccion('anular-entrega', id); render(); return; }
       if(c.accion==='anularv'){
         const motivo = (S.motivo||'').trim();
         if(!motivo){ const i=$('motivo-input'); if(i){ i.focus(); i.setAttribute('aria-invalid','true'); i.placeholder='El motivo es obligatorio'; } return; }
@@ -1088,6 +1169,11 @@ details.anuladas .tablewrap{margin-top:8px}
       e.pases.filter(p => p.estado!=='anulado').forEach(p => (p.movimientos||[]).filter(ok).forEach(m => res.push({caja, m, uid:e.uid, pase:p,
         estado:'<span class="pill '+(p.estado==='recibido'?(p.conDiferencia?'diferencia':'recibido'):'pendiente')+'">'+(p.estado==='recibido'?'Pase recibido':'Pase pendiente')+'</span><span class="sub num">'+esc(p.numero)+'</span>'})));
     });
+    if(S.isOwner || esCaseros()) S.carpetas.filter(c => c.estado!=='anulada' && (S.isOwner || c.estado!=='en_sucursal') && norm(c.cliente).includes(q)).forEach(c => {
+      const [cls, txt] = CP_EST[c.estado] || ['pendiente', c.estado];
+      res.push({caja:'Carpeta', m:{fecha:c.fecha, cliente:c.cliente, concepto:c.concepto, recibo:c.entrega || 'Carpeta', monto:c.monto, moneda:'ARS'},
+        estado:'<span class="pill '+cls+'">Carpeta: '+txt+'</span>'+(c.estado==='rechazada' && c.revision ? '<span class="sub dif">'+esc(c.revision.motivo||'')+'</span>' : ''), carpeta:true});
+    });
     res.sort((a,b) => (b.m.fecha||'').localeCompare(a.m.fecha||''));
     box.hidden = false;
     if(!res.length){ box.innerHTML = '<div class="empty" style="padding:14px"><strong>Sin resultados</strong><span>No hay ventas con ese cliente o número de recibo'+(S.isOwner?' en ninguna caja.':' en su caja.')+'</span></div>'; return; }
@@ -1095,7 +1181,7 @@ details.anuladas .tablewrap{margin-top:8px}
     box.innerHTML = '<div class="muted" style="font-size:13px;margin-bottom:8px">'+res.length+(res.length===1?' resultado':' resultados')+(res.length>50?' · se muestran los 50 más recientes':'')+'</div>'+
       '<div class="tablewrap"><table class="wide"><thead><tr>'+(S.isOwner?'<th>Caja</th>':'')+'<th>Fecha</th><th>Cliente</th><th>Concepto</th><th>Recibo</th><th class="amt">Monto</th><th>Estado</th><th class="amt"></th></tr></thead><tbody>'+
       shown.map(r => '<tr>'+(S.isOwner?'<td>'+esc(r.caja)+'</td>':'')+'<td class="num">'+fdate(r.m.fecha)+'</td><td>'+esc(r.m.cliente)+'</td><td>'+esc(r.m.concepto||'—')+'</td><td>'+esc(r.m.recibo||'—')+'</td><td class="amt num">'+fmt(r.m.monto, monOf(r.m))+'</td><td>'+r.estado+'</td>'+
-        '<td class="amt">'+(r.pase?'<button type="button" class="small" data-act="pdf" data-uid="'+esc(r.uid)+'" data-id="'+esc(r.pase.numero)+'">Comprobante</button>':'')+'</td></tr>').join('')+'</tbody></table></div>';
+        '<td class="amt">'+(r.pase?'<button type="button" class="small" data-act="pdf" data-uid="'+esc(r.uid)+'" data-id="'+esc(r.pase.numero)+'">Comprobante</button>':(r.carpeta?'<button type="button" class="small" data-act="tab" data-tab="carpetas">Ver carpetas</button>':''))+'</td></tr>').join('')+'</tbody></table></div>';
   }
   $('q').addEventListener('input', renderBusqueda);
   function renderAnul(pre, e){
@@ -1163,6 +1249,8 @@ details.anuladas .tablewrap{margin-top:8px}
       avisos.push(['bad', 'En ' + mesNombre + ' hubo ' + (conDif.length===1 ? '1 pase recibido' : conDif.length+' pases recibidos') + ' con diferencia: ' + difTexto({diferencia:{ARS:r2(d.ARS), USD:r2(d.USD)}}) + ' en total.', '']);
     }
     lista.filter(superaLimite).forEach(e => avisos.push(['warn', 'La caja ' + CAJAS[e.perfil.caja] + ' tiene ' + fmt(tot(enCaja(e)).ARS,'ARS') + ' y superó el límite de ' + fmt(LIMITE_ARS,'ARS') + '.', '']));
+    const cpRech = S.carpetas.filter(c => c.estado==='rechazada').length;
+    if(cpRech) avisos.push(['bad', 'Tesorería Caseros devolvió ' + (cpRech===1 ? '1 carpeta' : cpRech + ' carpetas') + ' a la sucursal. Hay que corregirlas e incluirlas en la próxima entrega.', '<button type="button" class="small" data-act="tab" data-tab="carpetas">Ver carpetas</button>']);
     if(!avisos.length) avisos.push(['ok', 'No hay pases pendientes ni diferencias en ' + mesNombre + '.', '']);
     $('res-kpis').innerHTML = avisos.map(([c,t,x]) => '<div class="aviso '+c+'"><span class="marca"></span><p>'+esc(t)+'</p>'+x+'</div>').join('');
     $('res-alerta').hidden = true;
@@ -1194,6 +1282,242 @@ details.anuladas .tablewrap{margin-top:8px}
     const pend = todos.filter(p => p.estado==='pendiente' && p.destino==='tesoreria');
     $('res-pend').innerHTML = pend.length ? pend.map(p => rowPase(p)).join('') : emptyRow(7,'No hay pases por recibir','Cuando una caja pasa su efectivo, el pase aparece acá para contarlo y aceptarlo.');
   }
+  /* ---------- carpetas (Tesorería Liniers ↔ Tesorería Caseros) ---------- */
+  // Dónde está cada carpeta: en la sucursal, en una entrega por recibir, en poder de Caseros, o devuelta.
+  const CP_EST = {
+    en_sucursal:['pendiente','En la sucursal'], enviada:['pendiente','Por recibir en Caseros'], aceptada:['recibido','En poder de Caseros'],
+    rechazada:['anulado','Devuelta a la sucursal'], anulada:['anulado','Anulada']
+  };
+  const enSucursal = c => c.estado==='en_sucursal' || c.estado==='rechazada';
+  const carpetaFromRow = r => Object.assign({}, r.data, {id:r.id, estado:r.estado, fecha:r.fecha_entrega, entrega:r.entrega||null, revision:r.revision||null, historial:r.historial||[], createdAt:r.created_at});
+  const claveEntrega = c => c.entrega || ('F-' + c.fecha);
+  const numEntrega = k => k.startsWith('F-') ? 'Entrega del ' + fdate(k.slice(2)) : k;
+  function cpLimpiarForm(){
+    $('form-carpeta').reset(); S.cpEdit = null;
+    $('btn-cp').textContent = 'Agregar a la sucursal'; $('cp-cancel').hidden = true; $('t-cp-form').textContent = 'Cargar carpeta'; cpTotal();
+  }
+  function cpTotal(){
+    const t = r2(parseAR($('cp-efectivo').value) + parseAR($('cp-transf').value));
+    $('cp-total').innerHTML = '<span>Monto de la carpeta</span><b>'+fmt(t,'ARS')+'</b>';
+  }
+  ['cp-efectivo','cp-transf'].forEach(id => $(id).addEventListener('blur', e => { const n = parseAR(e.target.value); e.target.value = n ? fmtPlain(n) : ''; }));
+  $('form-carpeta').addEventListener('input', () => { $('cp-msg').hidden = true; cpTotal(); });
+  $('cp-cancel').addEventListener('click', () => { cpLimpiarForm(); $('cp-msg').hidden = true; });
+  $('form-carpeta').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const d = {cliente:$('cp-cliente').value.trim(), concepto:$('cp-concepto').value, efectivo:parseAR($('cp-efectivo').value), transferencia:parseAR($('cp-transf').value),
+      asesor:$('cp-asesor').value.trim(), onboarder:$('cp-onb').value.trim(), observacion:$('cp-obs').value.trim()};
+    d.monto = r2(d.efectivo + d.transferencia);
+    if(!d.cliente) return msg($('cp-msg'),'err','Falta el nombre del cliente.');
+    if(!d.concepto) return msg($('cp-msg'),'err','Falta elegir el concepto.');
+    if(d.monto <= 0) return msg($('cp-msg'),'err','Cargar el monto en efectivo, en transferencia o en los dos.');
+    const igual = S.carpetas.find(c => c.id!==S.cpEdit && c.estado!=='anulada' && normCli(c.cliente)===normCli(d.cliente) && c.concepto===d.concepto && Math.abs((c.monto||0)-d.monto)<0.005);
+    const clave = 'cp|'+normCli(d.cliente)+'|'+d.concepto+'|'+d.monto;
+    if(igual && S.cpDupOk!==clave){ S.cpDupOk = clave; return msg($('cp-msg'),'info','Ya hay una carpeta igual: '+igual.cliente+', '+igual.concepto+', '+fmt(igual.monto,'ARS')+' ('+CP_EST[igual.estado][1].toLowerCase()+'). Si es otra carpeta, tocar el botón otra vez para guardarla igual.'); }
+    S.cpDupOk = null;
+    const btn = $('btn-cp'); btn.disabled = true;
+    try{
+      if(S.cpEdit){
+        chk(await sb.from('caja_carpetas').update({data:d}).eq('id', S.cpEdit));
+        msg($('cp-msg'),'ok','Carpeta de '+d.cliente+' actualizada. Sigue en la sucursal hasta la próxima entrega.');
+      } else {
+        chk(await sb.from('caja_carpetas').insert({owner:S.uid, estado:'en_sucursal', fecha_entrega:todayISO(), data:d, created_at:new Date().toISOString()}));
+        msg($('cp-msg'),'ok','Carpeta de '+d.cliente+' cargada. Queda en la sucursal hasta que arme la entrega a Caseros.');
+      }
+      cpLimpiarForm(); $('cp-cliente').focus();
+    }catch(e){ msg($('cp-msg'),'err',errTxt(e)); }
+    finally{ btn.disabled = false; }
+    await cargar();
+  });
+  function genNumeroEntrega(){
+    const abc='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; const r = new Uint32Array(4); crypto.getRandomValues(r);
+    return 'EC-' + todayISO().replace(/-/g,'') + '-' + Array.from(r, v => abc[v % abc.length]).join('');
+  }
+  async function armarEntrega(){
+    const el = $('cp-lista-msg');
+    const sel = S.carpetas.filter(c => enSucursal(c) && S.cpSel.has(c.id));
+    if(!sel.length) return msg(el,'err','Marcar al menos una carpeta para entregar.');
+    const numero = genNumeroEntrega(), hoy = todayISO();
+    const btnA = $('btn-armar'); if(btnA) btnA.disabled = true;
+    try{
+      const nuevas = sel.filter(c => c.estado==='en_sucursal').map(c => c.id);
+      if(nuevas.length) chk(await sb.from('caja_carpetas').update({estado:'enviada', entrega:numero, fecha_entrega:hoy}).in('id', nuevas));
+      for(const c of sel.filter(c => c.estado==='rechazada'))
+        chk(await sb.from('caja_carpetas').update({estado:'enviada', entrega:numero, fecha_entrega:hoy, revision:null, historial:(c.historial||[]).concat([Object.assign({entrega:c.entrega}, c.revision||{})])}).eq('id', c.id));
+      S.cpSel.clear(); S.cpVista = 'entregas';
+      await cargar();
+      msg($('cp-lista-msg'),'ok','Entrega '+numero+' registrada con '+sel.length+(sel.length===1?' carpeta':' carpetas')+'. Imprimir el remito y firmarlo con Elías al entregarlas.');
+      descargarRemito(numero);
+    }catch(e){ msg(el,'err',errTxt(e)); await cargar(); }
+    finally{ const b = $('btn-armar'); if(b) b.disabled = !S.cpSel.size; }
+  }
+  async function cpAccion(accion, id, extra){
+    const now = new Date().toISOString(), quien = S.perfil ? S.perfil.responsable : '';
+    const el = $('cp-lista-msg');
+    try{
+      if(accion==='ok') chk(await sb.from('caja_carpetas').update({estado:'aceptada', revision:{resultado:'aceptada', fecha:now, por:quien}}).eq('id', id));
+      else if(accion==='rechazar') chk(await sb.from('caja_carpetas').update({estado:'rechazada', revision:{resultado:'rechazada', motivo:extra, fecha:now, por:quien}}).eq('id', id));
+      else if(accion==='anular') chk(await sb.from('caja_carpetas').update({estado:'anulada'}).eq('id', id));
+      else if(accion==='todas') chk(await sb.from('caja_carpetas').update({estado:'aceptada', revision:{resultado:'aceptada', fecha:now, por:quien}}).eq('entrega', id).eq('estado','enviada'));
+      else if(accion==='anular-entrega') chk(await sb.from('caja_carpetas').update({estado:'en_sucursal', entrega:null}).eq('entrega', id).eq('estado','enviada'));
+      el.hidden = true;
+    }catch(e){ msg(el,'err',errTxt(e)); }
+    await cargar();
+  }
+  function cpEditar(id){
+    const c = S.carpetas.find(x => x.id===id); if(!c) return;
+    S.cpEdit = id;
+    $('cp-cliente').value = c.cliente||''; $('cp-concepto').value = c.concepto||'';
+    $('cp-efectivo').value = c.efectivo ? fmtPlain(c.efectivo) : ''; $('cp-transf').value = c.transferencia ? fmtPlain(c.transferencia) : '';
+    $('cp-asesor').value = c.asesor||''; $('cp-onb').value = c.onboarder||''; $('cp-obs').value = c.observacion||'';
+    $('btn-cp').textContent = 'Guardar cambios';
+    $('t-cp-form').textContent = 'Corregir carpeta: ' + (c.cliente||'');
+    $('cp-cancel').hidden = false; cpTotal(); $('cp-msg').hidden = true;
+    const t = $('t-cp-form'); if(t.scrollIntoView) t.scrollIntoView({block:'start', behavior:'smooth'});
+  }
+  function pdfRemito(clave){
+    const lista = S.carpetas.filter(c => claveEntrega(c)===clave && c.estado!=='anulada').sort((a,b) => (a.createdAt||'').localeCompare(b.createdAt||''));
+    const fecha = lista.length ? lista[0].fecha : todayISO();
+    const doc = new window.jspdf.jsPDF({unit:'mm', format:'a4', orientation:'landscape'});
+    const L = 12, R = 285;
+    const cols = [[L,'N°',8],[L+9,'Cliente',60],[L+70,'Concepto',20],[L+90,'Monto',26,'r'],[L+116,'Efectivo',26,'r'],[L+142,'Transferencia',28,'r'],[L+174,'Asesor',26],[L+201,'Onboarder',26],[L+228,'Observación',45]];
+    const fit = (t, w) => doc.splitTextToSize(String(t||'—'), w)[0];
+    let y, pagina = 0;
+    function head(){
+      if(pagina++) doc.addPage();
+      y = 16;
+      doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(20); doc.text('MÁS DUEÑOS', L, y);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text('Tesorería Liniers', L, y+5);
+      doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(20); doc.text('REMITO DE CARPETAS' + (clave.startsWith('F-') ? '' : ' N° ' + clave), R, y, {align:'right'});
+      doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.text('Entrega del ' + fdate(fecha) + ' · Tesorería Liniers a Tesorería Caseros (Principal)', R, y+5, {align:'right'});
+      y += 10; doc.setDrawColor(30); doc.setLineWidth(0.5); doc.line(L, y, R, y); y += 7;
+      doc.setFillColor(239,240,236); doc.rect(L, y-4.5, R-L, 7, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(60);
+      cols.forEach(([x,t,w,al]) => doc.text(t.toUpperCase(), al==='r' ? x+w : x+1, y, al==='r' ? {align:'right'} : undefined));
+      y += 7; doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(20);
+    }
+    head();
+    lista.forEach((c, i) => {
+      const obs = c.observacion ? doc.splitTextToSize(String(c.observacion), cols[8][2]-1).slice(0,2) : ['—'];
+      const extra = (obs.length-1) * 3.6;
+      if(y + extra > 190) head();
+      const v = [String(i+1), c.cliente, c.concepto, fmt(c.monto,'ARS'), c.efectivo?fmt(c.efectivo,'ARS'):'—', c.transferencia?fmt(c.transferencia,'ARS'):'—', c.asesor, c.onboarder];
+      cols.slice(0,8).forEach(([x,,w,al], k) => doc.text(al==='r' ? v[k] : fit(v[k], w-1), al==='r' ? x+w : x+1, y, al==='r' ? {align:'right'} : undefined));
+      doc.text(obs, cols[8][0]+1, y);
+      doc.setDrawColor(215); doc.setLineWidth(0.15); doc.line(L, y+2.2+extra, R, y+2.2+extra); y += 6.4 + extra;
+    });
+    if(y > 178) head();
+    const t = k => r2(lista.reduce((s,c) => s + (Number(c[k])||0), 0));
+    doc.setDrawColor(30); doc.setLineWidth(0.4); doc.line(L, y-2.4, R, y-2.4);
+    doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    doc.text(lista.length + (lista.length===1 ? ' carpeta' : ' carpetas'), L+10, y+3);
+    doc.text(fmt(t('monto'),'ARS'), cols[3][0]+cols[3][2], y+3, {align:'right'}); doc.text(fmt(t('efectivo'),'ARS'), cols[4][0]+cols[4][2], y+3, {align:'right'}); doc.text(fmt(t('transferencia'),'ARS'), cols[5][0]+cols[5][2], y+3, {align:'right'});
+    const ys = 192;
+    doc.setDrawColor(30); doc.setLineWidth(0.3); doc.line(L, ys, L+80, ys); doc.line(R-80, ys, R, ys);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(20); doc.text('Entrega: ' + (S.isOwner ? S.perfil.responsable : ''), L, ys+4.5); doc.text('Recibe:', R-80, ys+4.5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(100);
+    doc.text('Tesorería Liniers · firma y aclaración', L, ys+8.5); doc.text('Tesorería Caseros (Principal) · firma, aclaración y fecha', R-80, ys+8.5);
+    doc.setFontSize(7); doc.setTextColor(140); doc.text('Emitido ' + new Date().toLocaleString('es-AR') + '. Al recibirlas, Caseros marca cada carpeta como recibida o la devuelve con el motivo en la página de Tesorería.', L, 204);
+    return doc.output('arraybuffer');
+  }
+  async function descargarRemito(clave){
+    const el = $('cp-lista-msg');
+    if(!window.jspdf) return msg(el,'err','No se pudo cargar el generador de PDF. Recargar la página e intentar de nuevo.');
+    try{
+      const url = URL.createObjectURL(new Blob([pdfRemito(clave)], {type:'application/pdf'}));
+      const a = document.createElement('a'); a.href = url; a.download = 'Remito de carpetas ' + (clave.startsWith('F-') ? fdate(clave.slice(2)).replace(/\//g,'-') : clave) + '.pdf';
+      document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
+    }catch(e){ msg(el,'err','No se pudo generar el remito.'); }
+  }
+  $('cp-concepto').innerHTML = $('v-concepto').innerHTML;
+  cpTotal();
+  // Vistas: admin → sucursal | entregas | caseros | todas ; Caseros → recibir | caseros | devueltas | todas
+  function cpVistas(){
+    const n = f => S.carpetas.filter(f).length;
+    if(S.isOwner) return [['sucursal','En la sucursal', n(enSucursal)], ['entregas','Por recibir en Caseros', n(c => c.estado==='enviada')], ['caseros','En poder de Caseros', n(c => c.estado==='aceptada')], ['todas','Todas', n(c => c.estado!=='anulada')]];
+    return [['recibir','Por recibir', n(c => c.estado==='enviada')], ['caseros','En mi poder', n(c => c.estado==='aceptada')], ['devueltas','Devueltas', n(c => c.estado==='rechazada')], ['todas','Todas', n(c => c.estado!=='anulada' && c.estado!=='en_sucursal')]];
+  }
+  function cpTabla(lista, opts){
+    const sel = opts && opts.seleccion;
+    const total = r2(lista.filter(c => c.estado!=='anulada').reduce((s,c) => s + (Number(c.monto)||0), 0));
+    const todosSel = sel && lista.length && lista.every(c => S.cpSel.has(c.id));
+    return '<div class="tablewrap" style="border:0;border-radius:0"><table class="wide carpetas"><thead><tr>'+(sel?'<th class="sel"><input type="checkbox" data-cp-todas aria-label="Marcar todas"'+(todosSel?' checked':'')+'></th>':'')+'<th>Cliente</th><th>Concepto</th><th class="amt">Monto</th><th class="amt">Efectivo</th><th class="amt">Transferencia</th><th>Asesor</th><th>Onboarder</th><th>Observación</th><th>Estado</th><th class="amt">Acciones</th></tr></thead><tbody>'+
+      lista.map(c => cpFila(c, sel)).join('')+'</tbody><tfoot><tr>'+(sel?'<td></td>':'')+'<td colspan="2">Total · '+lista.length+(lista.length===1?' carpeta':' carpetas')+'</td><td class="amt">'+fmt(total,'ARS')+'</td><td colspan="7"></td></tr></tfoot></table></div>';
+  }
+  function cpGrupos(lista, acciones){
+    const grupos = {}; lista.forEach(c => { const k = claveEntrega(c); (grupos[k] = grupos[k] || []).push(c); });
+    const claves = Object.keys(grupos).sort((a,b) => (grupos[b][0].fecha||'').localeCompare(grupos[a][0].fecha||'') || b.localeCompare(a));
+    return claves.map(k => {
+      const g = grupos[k].sort((a,b) => (a.createdAt||'').localeCompare(b.createdAt||''));
+      const todas = S.carpetas.filter(c => claveEntrega(c)===k && c.estado!=='anulada');
+      const cuenta = [['aceptada','en Caseros'],['enviada','por recibir'],['rechazada','devueltas']].map(([e,l]) => { const n = todas.filter(c => c.estado===e).length; return n ? n+' '+l : ''; }).filter(Boolean).join(' · ');
+      return '<div class="cp-grupo"><div class="cp-grupo-h"><div><b>'+esc(numEntrega(k))+'</b><span class="muted"> · '+fdate(g[0].fecha)+' · '+todas.length+(todas.length===1?' carpeta':' carpetas')+(cuenta?' · '+esc(cuenta):'')+'</span></div><div class="rowact">'+acciones(k, todas)+'</div></div>'+cpTabla(g)+'</div>';
+    }).join('');
+  }
+  function renderCarpetas(){
+    const admin = S.isOwner, cas = esCaseros();
+    const vistas = cpVistas();
+    if(!vistas.some(v => v[0]===S.cpVista)) S.cpVista = admin ? 'sucursal' : ((vistas[0][2] || !vistas[1][2]) ? 'recibir' : 'caseros');
+    $('cp-form-panel').hidden = !(admin && (S.cpVista==='sucursal' || S.cpEdit));
+    if(admin){
+      const uniq = k => [...new Set(S.carpetas.map(c => (c[k]||'').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+      $('dl-asesores').innerHTML = uniq('asesor').map(v => '<option value="'+esc(v)+'"></option>').join('');
+      $('dl-onboarders').innerHTML = uniq('onboarder').map(v => '<option value="'+esc(v)+'"></option>').join('');
+    }
+    const n = k => S.carpetas.filter(c => c.estado===k).length;
+    const aviso = $('cp-aviso');
+    if(S.carpetasError){ aviso.hidden = false; aviso.className = 'msg err'; aviso.textContent = 'No se pudieron cargar las carpetas. Si recién se agregó este apartado, falta ejecutar el supabase.sql nuevo en Supabase. (' + S.carpetasError + ')'; }
+    else if(admin && n('rechazada')){ aviso.hidden = false; aviso.className = 'msg info'; aviso.textContent = 'Caseros devolvió ' + (n('rechazada')===1 ? '1 carpeta' : n('rechazada') + ' carpetas') + ' a la sucursal. Revise el motivo, corríjala y vuelva a incluirla en la próxima entrega.'; }
+    else if(cas && n('enviada')){ aviso.hidden = false; aviso.className = 'msg info'; aviso.textContent = 'Tesorería Liniers le entregó ' + (n('enviada')===1 ? '1 carpeta' : n('enviada') + ' carpetas') + '. Revise cada una: al marcarla como recibida queda en su poder; si algo falta, devuélvala con el motivo.'; }
+    else aviso.hidden = true;
+    $('cp-filtros').innerHTML = vistas.map(([k,l,c]) => '<button type="button" data-act="cp-vista" data-id="'+k+'" aria-pressed="'+(S.cpVista===k)+'">'+l+' <span class="muted">'+c+'</span></button>').join('');
+    const v = S.cpVista; let h = '';
+    if(admin && v==='sucursal'){
+      const lista = S.carpetas.filter(enSucursal).sort((a,b) => (a.estado==='rechazada'?0:1)-(b.estado==='rechazada'?0:1) || (a.createdAt||'').localeCompare(b.createdAt||''));
+      [...S.cpSel].forEach(id => { if(!lista.some(c => c.id===id)) S.cpSel.delete(id); });
+      const elegidas = lista.filter(c => S.cpSel.has(c.id));
+      const tot = r2(elegidas.reduce((s,c) => s + (Number(c.monto)||0), 0));
+      h = lista.length ? '<div class="cp-armar"><div><b>Entrega semanal a Caseros</b><span class="muted"> · marque las carpetas que lleva</span><div class="cp-armar-sum">'+elegidas.length+(elegidas.length===1?' carpeta':' carpetas')+' · '+fmt(tot,'ARS')+'</div></div><button type="button" class="primary" id="btn-armar" data-act="cp-armar"'+(elegidas.length?'':' disabled')+'>Registrar entrega y descargar remito</button></div>'+cpTabla(lista, {seleccion:true})
+        : '<div class="empty"><strong>No hay carpetas en la sucursal</strong><span>Cargue las carpetas de la semana con el formulario de arriba. Quedan acá hasta que arme la entrega a Caseros.</span></div>';
+    } else {
+      const filtro = {entregas:c => c.estado==='enviada', recibir:c => c.estado==='enviada', caseros:c => c.estado==='aceptada', devueltas:c => c.estado==='rechazada', todas:c => c.estado!=='anulada' && c.estado!=='en_sucursal'}[v];
+      const lista = S.carpetas.filter(filtro);
+      const acciones = (k, todas) => {
+        let a = '<button type="button" class="small" data-act="cp-remito" data-id="'+esc(k)+'">Remito PDF</button>';
+        const pend = todas.filter(c => c.estado==='enviada').length;
+        if(cas && pend) a += (S.conf && S.conf.key==='cpg|'+k) ? confBox('', k, '¿Recibir las '+pend+' carpetas pendientes?') : '<button type="button" class="small" data-act="cp-todas" data-id="'+esc(k)+'">Recibir todas ('+pend+')</button>';
+        if(admin && pend && !k.startsWith('F-') && todas.every(c => c.estado==='enviada')) a += (S.conf && S.conf.key==='cpe|'+k) ? confBox('', k, '¿Anular la entrega? Las carpetas vuelven a la sucursal.') : '<button type="button" class="small link" data-act="cp-anular-entrega" data-id="'+esc(k)+'">Anular entrega</button>';
+        return a;
+      };
+      h = lista.length ? cpGrupos(lista, acciones) : '<div class="empty"><strong>'+({entregas:'No hay entregas por recibir', recibir:'No hay carpetas por recibir', caseros:'Todavía no hay carpetas en poder de Caseros', devueltas:'No hay carpetas devueltas', todas:'Todavía no hay entregas'}[v])+'</strong><span>'+(admin ? 'Las entregas se arman desde «En la sucursal».' : 'Cuando Tesorería Liniers registre una entrega, aparece en «Por recibir».')+'</span></div>';
+    }
+    $('cp-lista').innerHTML = h;
+  }
+  function cpFila(c, seleccion){
+    const [cls, txt] = CP_EST[c.estado] || ['pendiente', c.estado];
+    const rev = c.revision || {};
+    let estado = '<span class="pill '+cls+'">'+txt+'</span>';
+    if(c.estado==='aceptada' && rev.fecha) estado += '<span class="sub">Recibida el '+new Date(rev.fecha).toLocaleDateString('es-AR')+(rev.por?' · '+esc(rev.por):'')+'</span>';
+    if(c.estado==='rechazada') estado += '<span class="sub dif">'+esc(rev.motivo||'Sin motivo')+'</span>'+(c.entrega?'<span class="sub">De la entrega '+esc(c.entrega)+'</span>':'');
+    if((c.historial||[]).length && c.estado!=='rechazada') estado += '<span class="sub">Se devolvió antes: '+esc((c.historial[c.historial.length-1]||{}).motivo||'sin motivo')+'</span>';
+    const key = 'cp|'+c.id, conf = S.conf && S.conf.key===key;
+    let acts = '';
+    if(esCaseros() && c.estado==='enviada'){
+      if(conf && S.conf.accion==='cp-rechazar') acts = '<span class="confirmbox"><input type="text" id="motivo-input" class="motivo" placeholder="Motivo de la devolución" value="'+esc(S.motivo||'')+'" aria-label="Motivo de la devolución"><button type="button" class="small primary" data-act="si" data-id="'+esc(c.id)+'">Devolver</button><button type="button" class="small" data-act="no">No</button></span>';
+      else acts = '<button type="button" class="small" data-act="cp-ok" data-id="'+esc(c.id)+'">Recibida OK</button><button type="button" class="small link" data-act="cp-rechazar" data-id="'+esc(c.id)+'">Devolver</button>';
+    }
+    if(S.isOwner && enSucursal(c)) acts = conf ? confBox('', c.id, '¿Anular esta carpeta?') : '<button type="button" class="small" data-act="cp-editar" data-id="'+esc(c.id)+'">Corregir</button><button type="button" class="small link" data-act="cp-anular" data-id="'+esc(c.id)+'">Anular</button>';
+    const chk = seleccion ? '<td class="sel"><input type="checkbox" data-cp-sel="'+esc(c.id)+'" aria-label="Incluir '+esc(c.cliente)+' en la entrega"'+(S.cpSel.has(c.id)?' checked':'')+'></td>' : '';
+    return '<tr class="'+(c.estado==='anulada'?'anulado':'')+(c.estado==='rechazada'?' devuelta':'')+'">'+chk+'<td data-l="Cliente" class="cli"><b style="font-weight:600">'+esc(c.cliente)+'</b></td><td data-l="Concepto">'+esc(c.concepto||'—')+'</td><td data-l="Monto" class="amt">'+fmt(c.monto,'ARS')+'</td>'+
+      '<td data-l="Efectivo" class="amt">'+(c.efectivo?fmt(c.efectivo,'ARS'):'<span class="muted">—</span>')+'</td><td data-l="Transferencia" class="amt">'+(c.transferencia?fmt(c.transferencia,'ARS'):'<span class="muted">—</span>')+'</td>'+
+      '<td data-l="Asesor">'+esc(c.asesor||'—')+'</td><td data-l="Onboarder">'+esc(c.onboarder||'—')+'</td><td data-l="Observación" class="obs'+(c.observacion?'':' vacia')+'">'+esc(c.observacion||'')+'</td><td data-l="Estado" class="est">'+estado+'</td><td class="acc"><div class="rowact">'+acts+'</div></td></tr>';
+  }
+  $('cp-lista').addEventListener('change', ev => {
+    const t = ev.target;
+    if(t.dataset && t.dataset.cpSel){ if(t.checked) S.cpSel.add(t.dataset.cpSel); else S.cpSel.delete(t.dataset.cpSel); renderCarpetas(); }
+    else if(t.hasAttribute && t.hasAttribute('data-cp-todas')){ S.carpetas.filter(enSucursal).forEach(c => { if(t.checked) S.cpSel.add(c.id); else S.cpSel.delete(c.id); }); renderCarpetas(); }
+  });
+
   function renderCaseros(){
     const mes = todayISO().slice(0,7);
     const entregas = Object.values(S.cajas).flatMap(e => e.pases).filter(p => p.destino==='principal').sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
@@ -1227,7 +1551,9 @@ details.anuladas .tablewrap{margin-top:8px}
     const grupo = html => '<div class="nav-group">' + html + '</div>';
     if(esCaseros()){
       const n = Object.values(S.cajas).flatMap(e => e.pases).filter(p => p.destino==='principal' && p.estado==='pendiente').length;
-      t.innerHTML = '<div class="nav-label">Mi caja</div>' + grupo(navItem('caseros', 'Tesorería Caseros', n ? (n===1 ? '1 entrega por recibir' : n+' entregas por recibir') : 'Entregas de Liniers', n ? '<span class="nav-badge">'+n+'</span>' : ''));
+      const nc = S.carpetas.filter(c => c.estado==='enviada').length;
+      t.innerHTML = '<div class="nav-label">Carpetas</div>' + grupo(navItem('carpetas', 'Carpetas', nc ? (nc===1 ? '1 por recibir' : nc+' por recibir') : S.carpetas.filter(c => c.estado==='aceptada').length + ' en su poder', nc ? '<span class="nav-badge">'+nc+'</span>' : '')) +
+        '<div class="nav-label">Mi caja</div>' + grupo(navItem('caseros', 'Tesorería Caseros', n ? (n===1 ? '1 entrega por recibir' : n+' entregas por recibir') : 'Entregas de Liniers', n ? '<span class="nav-badge">'+n+'</span>' : ''));
       return;
     }
     if(!S.isOwner){ t.innerHTML = '<div class="nav-label">Mi caja</div>' + grupo(navItem('mi', CAJAS[S.perfil.caja], corto(mi) + ' en caja')); return; }
@@ -1235,6 +1561,8 @@ details.anuladas .tablewrap{margin-top:8px}
     const pendientes = otros.reduce((n,e) => n + e.pases.filter(p => p.estado==='pendiente').length, 0);
     let h = '<div class="nav-label">General</div>' + grupo(navItem('resumen', 'Resumen', 'Todas las cajas', pendientes ? '<span class="nav-badge" title="Pases por recibir">'+pendientes+'</span>' : ''));
     h += '<div class="nav-label">Mi caja</div>' + grupo(navItem('mi', CAJAS[S.perfil.caja], corto(mi) + ' en caja'));
+    const nr = S.carpetas.filter(c => c.estado==='rechazada').length, ns = S.carpetas.filter(c => c.estado==='en_sucursal' || c.estado==='rechazada').length, np = S.carpetas.filter(c => c.estado==='enviada').length;
+    h += '<div class="nav-label">Con Tesorería Caseros</div>' + grupo(navItem('carpetas', 'Carpetas', ns + ' en la sucursal' + (np ? ' · ' + np + ' por recibir' : ''), nr ? '<span class="nav-dot" title="Devueltas por Caseros">'+nr+'</span>' : ''));
     h += '<div class="nav-label">Cajas a cargo</div>';
     h += otros.length ? grupo(otros.map(e => {
       const n = e.pases.filter(p => p.estado==='pendiente').length;
@@ -1258,6 +1586,7 @@ details.anuladas .tablewrap{margin-top:8px}
     const hoy = new Date().toLocaleDateString('es-AR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
     let titulo = 'Resumen', crumb = hoy.charAt(0).toUpperCase() + hoy.slice(1), sub = '';
     if(tab==='resumen'){ titulo = 'Resumen'; sub = ''; }
+    else if(tab==='carpetas'){ titulo = 'Carpetas'; sub = S.isOwner ? 'Las carpetas quedan en la sucursal hasta que arma la entrega semanal. Cuando Elías las recibe, pasan a estar en poder de Caseros; si devuelve alguna, vuelve a la sucursal con el motivo.' : 'Carpetas que entrega Tesorería Liniers. Al marcarlas como recibidas quedan en su poder; si algo falta, devuélvalas con el motivo.'; }
     else if(tab==='caseros'){ titulo = 'Tesorería Caseros'; sub = 'Entregas de Tesorería Liniers: cuente el efectivo de cada una y acéptela. Si no coincide, queda registrado el faltante o sobrante.'; }
     else if(tab==='mi'){ titulo = 'Caja ' + CAJAS[S.perfil.caja]; sub = S.perfil.caja==='tesoreria' ? 'Sus ventas y los pases que aceptó, hasta que los entregue a la Tesorería Caseros.' : 'Cargue las ventas de su caja y, cuando corresponda, páselas a Tesorería Liniers con su comprobante.'; }
     else { const e = S.cajas[tab.slice(2)]; if(e && e.perfil){ titulo = 'Caja ' + CAJAS[e.perfil.caja]; sub = 'Vista de control de la caja a cargo de ' + e.perfil.responsable + '.'; } }
@@ -1280,10 +1609,10 @@ details.anuladas .tablewrap{margin-top:8px}
     $('v-login').hidden=true; $('v-espera').hidden=true; $('v-perfil').hidden=true; $('v-app').hidden=false;
     syncShell();
     renderTabs();
-    const tab = S.isOwner ? S.tab : (esCaseros() ? 'caseros' : 'mi');
+    const tab = S.isOwner ? S.tab : (esCaseros() ? (S.tab==='carpetas' ? 'carpetas' : 'caseros') : 'mi');
     setTitulos(tab);
-    $('p-resumen').hidden = tab!=='resumen'; $('p-mi').hidden = tab!=='mi'; $('p-otra').hidden = !tab.startsWith('u:'); $('p-caseros').hidden = tab!=='caseros';
-    if(tab==='resumen') renderResumen(); else if(tab==='mi') renderMi(); else if(tab==='caseros') renderCaseros(); else renderOtra(tab.slice(2));
+    $('p-resumen').hidden = tab!=='resumen'; $('p-mi').hidden = tab!=='mi'; $('p-otra').hidden = !tab.startsWith('u:'); $('p-caseros').hidden = tab!=='caseros'; $('p-carpetas').hidden = tab!=='carpetas';
+    if(tab==='resumen') renderResumen(); else if(tab==='mi') renderMi(); else if(tab==='caseros') renderCaseros(); else if(tab==='carpetas') renderCarpetas(); else renderOtra(tab.slice(2));
     renderBusqueda();
     const fe = S.conf && S.focusId ? $(S.focusId) : null;
     if(fe && document.activeElement!==fe){ fe.focus(); try{ fe.setSelectionRange(fe.value.length, fe.value.length); }catch(_){} }
@@ -1293,11 +1622,11 @@ details.anuladas .tablewrap{margin-top:8px}
   function mostrarLogin(){
     S.uid = null; S.isOwner = false; S.cajaAsignada = null; S.perfil = undefined; S.cajas = {}; S.conf = null;
     // Limpiar lo que dejó la persona anterior en esta computadora.
-    ['form-perfil','form-venta','form-pase'].forEach(id => $(id).reset());
+    ['form-perfil','form-venta','form-pase','form-carpeta'].forEach(id => $(id).reset()); S.cpEdit = null; S.cpVista = ''; S.cpSel.clear(); S.carpetas = [];
     $('p-sucursal').value = 'Liniers'; $('v-fecha').value = todayISO(); $('x-corte').value = todayISO();
     clearDesglose(); S.elegidas.clear(); S.detalle.clear(); S.prevOpen.clear(); S.tab = 'mi'; S.editando = false;
     $('q').value = ''; $('q-res').hidden = true; $('q-res').innerHTML = '';
-    ['venta-msg','pase-msg','perfil-msg','mi-pases-msg','res-msg','o-msg','c-msg'].forEach(id => { $(id).hidden = true; });
+    ['venta-msg','pase-msg','perfil-msg','mi-pases-msg','res-msg','o-msg','c-msg','cp-msg','cp-lista-msg'].forEach(id => { $(id).hidden = true; });
     $('v-espera').hidden = true; $('v-perfil').hidden = true; $('v-app').hidden = true; $('v-login').hidden = false; cerrarPass(); syncShell();
     setStatus('off', 'Sin sesión');
   }
