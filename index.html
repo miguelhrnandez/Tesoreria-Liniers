@@ -186,6 +186,32 @@ table.mini{min-width:0;font-size:13px;background:var(--surface);border:1px solid
 table.mini th{background:var(--surface);font-size:12px;padding:5px 8px}
 table.mini td{padding:5px 8px;background:var(--surface)!important}
 .det-h{font-size:12.5px;color:var(--muted);padding:8px 0 6px}
+.llevar{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;margin-top:-6px}
+.llevar-h{display:flex;justify-content:space-between;gap:8px;padding:7px 10px;background:var(--head);border-bottom:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.llevar-list{max-height:240px;overflow-y:auto}
+.llevar-row{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:6px 10px;font-size:13px}
+.llevar-row + .llevar-row{border-top:1px solid var(--line)}
+.llevar-row .cli{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.llevar-row .cli small{color:var(--muted);margin-left:6px}
+.llevar-row .m{white-space:nowrap;text-align:right}
+.llevar-row.pase .cli{font-style:italic}
+.llevar .vacio{padding:10px;color:var(--muted);font-size:13px}
+.llevar-g{padding:6px 10px;font-size:12px;font-weight:600;color:var(--muted);background:var(--surface);display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line)}
+.llevar-list > .llevar-g:first-child{border-top:0}
+details.llevar-pase{border-top:1px solid var(--line)}
+details.llevar-pase > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:6px 10px;font-size:13px}
+details.llevar-pase > summary::-webkit-details-marker{display:none}
+details.llevar-pase > summary:hover{background:var(--accent-soft)}
+details.llevar-pase > summary .cli::before{content:"▸ ";color:var(--muted)}
+details.llevar-pase .cli{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+details.llevar-pase .cli small{color:var(--muted);margin-left:6px}
+details.llevar-pase > summary .m{white-space:nowrap;text-align:right}
+details.llevar-pase[open] > summary .cli::before{content:"▾ "}
+details.llevar-pase .sub-row{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:10px;padding:4px 10px 4px 26px;font-size:12.5px;color:var(--ink-2);background:var(--head)}
+details.llevar-pase .sub-row .m{text-align:right;white-space:nowrap}
+details.llevar-pase .nota{padding:4px 10px 6px 26px;font-size:12px;color:var(--warn);background:var(--head)}
+.llevar-tot{display:flex;justify-content:space-between;gap:8px;padding:7px 10px;border-top:1px solid var(--line-2);background:var(--head);font-size:13px;font-weight:700}
+.llevar-tot span:last-child{text-align:right}
 .sumline{font-size:13.5px;display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:var(--r);background:var(--head);border:1px solid var(--line);flex-wrap:wrap}
 .sumline b{font-weight:700}
 .sumline .tot{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
@@ -398,6 +424,7 @@ details.anuladas .tablewrap{margin-top:8px}
                 <div class="field"><label for="x-destino">Caja que recibe</label><select id="x-destino"></select></div>
                 <div class="field full" id="x-mon-f"><span class="lbl">Monedas a pasar</span><div class="checks"><label for="x-ars"><input type="checkbox" id="x-ars" checked> Pesos</label><label for="x-usd"><input type="checkbox" id="x-usd" checked> Dólares</label></div></div>
                 <div class="sumline full" id="x-sum"></div>
+                <div class="full llevar" id="x-prev" hidden></div>
                 <div class="field full"><label for="x-nombre">A nombre de</label><input type="text" id="x-nombre" list="dl-personas" placeholder="Persona a cuyo nombre se hace el pase"></div>
                 <div class="field full"><label for="x-recibe">Responsable que recibe</label><input type="text" id="x-recibe" list="dl-personas" placeholder="Firma en el comprobante"></div>
                 <div class="field full"><label for="x-obs">Observaciones</label><textarea id="x-obs" placeholder="Opcional"></textarea></div>
@@ -476,7 +503,7 @@ details.anuladas .tablewrap{margin-top:8px}
   };
   const MONS = ['ARS','USD'];
   const $ = id => document.getElementById(id);
-  const S = { elegidas:new Set(), detalle:new Set(), db:null, dl:null, uid:null, isOwner:false, perfil:undefined, cajas:{}, tab:'mi', conf:null, editando:false, conteo:{}, focusId:null, difOk:null, motivo:'' };
+  const S = { prevOpen:new Set(), elegidas:new Set(), detalle:new Set(), db:null, dl:null, uid:null, isOwner:false, perfil:undefined, cajas:{}, tab:'mi', conf:null, editando:false, conteo:{}, focusId:null, difOk:null, motivo:'' };
 
   /* ---------- formato ---------- */
   const fmt = (n, mon) => MON[mon||'ARS'].sym + ' ' + (Number(n)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -767,6 +794,7 @@ details.anuladas .tablewrap{margin-top:8px}
     if(c.checked) S.elegidas.add(c.dataset.elegir); else S.elegidas.delete(c.dataset.elegir);
     c.closest('label').classList.toggle('on', c.checked); renderPaseSum();
   });
+  $('x-prev').addEventListener('toggle', ev => { const d = ev.target; if(!d.dataset || !d.dataset.prev) return; if(d.open) S.prevOpen.add(d.dataset.prev); else S.prevOpen.delete(d.dataset.prev); }, true);
   ['x-modo-todo','x-modo-elegir'].forEach(id => $(id).addEventListener('change', () => { renderLista(); renderPaseSum(); }));
   function seleccion(){
     const mov = enCaja(mia());
@@ -783,7 +811,40 @@ details.anuladas .tablewrap{margin-top:8px}
     return {sel, mons, totales:tot(sel), queda:tot(mov.filter(m => !ids.has(m.id))), corte, modo:'todo'};
   }
   function renderPaseSum(){
-    const {sel, totales} = seleccion();
+    const {sel, totales, modo, corte} = seleccion();
+    const prev = $('x-prev');
+    prev.hidden = modo==='elegir';
+    const tesCaja = S.perfil && S.perfil.caja==='tesoreria';
+    if(modo!=='elegir' && tesCaja){
+      const row = m => '<div class="llevar-row"><span>'+fdate(m.fecha)+'</span><span class="cli">'+esc(m.cliente)+'<small>'+esc([m.concepto, m.recibo].filter(Boolean).join(' · '))+'</small></span><span class="m">'+fmt(m.monto, monOf(m))+'</span></div>';
+      const pases = sel.filter(m => m.tipo==='pase').sort((a,b) => (a.fecha||'').localeCompare(b.fecha||'') || (a.recibo||'').localeCompare(b.recibo||''));
+      const propias = sel.filter(m => m.tipo!=='pase').sort((a,b) => monOf(a).localeCompare(monOf(b)) || (a.fecha||'').localeCompare(b.fecha||''));
+      const paseRow = m => {
+        const src = ((S.cajas[m.srcUid]||{}).pases||[]).find(q => q.numero===m.srcNumero) || {};
+        const ventas = (src.movimientos||[]).filter(v => monOf(v)===m.moneda);
+        const dif = ((src.diferencia||{})[m.moneda]) || 0;
+        const key = m.srcNumero+'|'+m.moneda, open = S.prevOpen.has(key);
+        return '<details class="llevar-pase" data-prev="'+esc(key)+'"'+(open?' open':'')+'><summary><span>'+fdate(m.fecha)+'</span><span class="cli">'+esc(m.recibo)+'<small>Caja '+esc(CAJAS[src.origen]||'')+' · '+esc(src.entrega||'')+' · '+ventas.length+(ventas.length===1?' venta':' ventas')+'</small></span><span class="m">'+fmt(m.monto, m.moneda)+'</span></summary>'+
+          ventas.map(v => '<div class="sub-row"><span>'+fdate(v.fecha)+'</span><span>'+esc(v.cliente)+(v.concepto?' · '+esc(v.concepto):'')+(v.recibo?' · '+esc(v.recibo):'')+'</span><span class="m">'+fmt(v.monto, monOf(v))+'</span></div>').join('')+
+          (dif ? '<div class="nota">Al recibirlo se contó '+fmt(m.monto, m.moneda)+': '+(dif<0?'faltante ':'sobrante ')+fmt(Math.abs(dif), m.moneda)+' respecto de lo cargado.</div>' : '')+'</details>';
+      };
+      const subt = list => { const t = tot(list); return MONS.filter(k => t[k]>0).map(k => fmt(t[k],k)).join(' + ') || fmt(0,'ARS'); };
+      let h = '<div class="llevar-h"><span>Lo que se lleva a Tesorería Caseros</span><span>'+(corte ? 'hasta el '+fdate(corte) : '')+'</span></div>';
+      if(!sel.length) h += '<div class="vacio">'+(corte ? 'No hay efectivo en caja hasta ese día en las monedas marcadas.' : 'Elegir hasta qué día se entrega.')+'</div>';
+      else {
+        h += '<div class="llevar-list">';
+        if(pases.length) h += '<div class="llevar-g"><span>Pases recibidos ('+pases.length+')</span><span>'+subt(pases)+'</span></div>' + pases.map(paseRow).join('');
+        if(propias.length) h += '<div class="llevar-g"><span>Ventas de Tesorería Liniers ('+propias.length+')</span><span>'+subt(propias)+'</span></div>' + propias.map(row).join('');
+        h += '</div><div class="llevar-tot"><span>Total a entregar</span><span>'+subt(sel)+'</span></div>';
+      }
+      prev.innerHTML = h;
+    } else if(modo!=='elegir'){
+      const lista = sel.slice().sort((a,b) => monOf(a).localeCompare(monOf(b)) || (a.fecha||'').localeCompare(b.fecha||''));
+      prev.innerHTML = '<div class="llevar-h"><span>Lo que se lleva este pase</span><span>'+(corte ? 'hasta el '+fdate(corte) : '')+'</span></div>'+
+        (lista.length ? '<div class="llevar-list">'+lista.map(m => '<div class="llevar-row'+(m.tipo==='pase'?' pase':'')+'"><span>'+fdate(m.fecha)+'</span>'+
+          '<span class="cli">'+esc(m.cliente)+'<small>'+esc([m.concepto, m.recibo].filter(Boolean).join(' · '))+'</small></span><span class="m">'+fmt(m.monto, monOf(m))+'</span></div>').join('')+'</div>'
+        : '<div class="vacio">'+(corte ? 'No hay ventas en caja hasta ese día en las monedas marcadas.' : 'Elegir hasta qué día se pasa.')+'</div>');
+    }
     const tes = S.perfil && S.perfil.caja==='tesoreria';
     $('x-sum').innerHTML = '<span>'+(tes?'Se entregan':'Se pasan')+' <b>'+sel.length+'</b> '+(tes ? (sel.length===1?'movimiento':'movimientos') : (sel.length===1?'venta':'ventas'))+'</span><span class="tot">'+MONS.filter(k => totales[k]>0).map(k => '<b>'+fmt(totales[k],k)+'</b>').join('')+(sel.length?'':'<b>'+fmt(0,'ARS')+'</b>')+'</span>';
     const des = getDesglose();
