@@ -327,7 +327,7 @@ details.anuladas .tablewrap{margin-top:8px}
           <div class="fields">
             <div class="field full"><label for="p-nombre">Nombre y apellido del responsable</label><input type="text" id="p-nombre" autocomplete="name"></div>
             <div class="field"><label for="p-caja">Caja a cargo</label>
-              <select id="p-caja"><option value="onb">Onboarding</option><option value="retencion">Retención</option><option value="tesoreria">Tesorería Liniers</option></select></div>
+              <select id="p-caja"><option value="onb">Onboarding</option><option value="retencion">Retención</option><option value="tesoreria">Tesorería Liniers</option><option value="principal">Tesorería Caseros (Principal)</option></select></div>
             <div class="field"><label for="p-sucursal">Sucursal</label><input type="text" id="p-sucursal" value="Liniers"></div>
           </div>
           <div id="perfil-msg" hidden></div>
@@ -406,7 +406,7 @@ details.anuladas .tablewrap{margin-top:8px}
                 <div class="field"><label for="v-fecha">Fecha</label><input type="date" id="v-fecha"></div>
                 <div class="field"><label for="v-monto">Monto</label><div class="moneyrow"><select id="v-moneda" aria-label="Moneda"><option value="ARS">Pesos</option><option value="USD">Dólares</option></select><input type="text" inputmode="decimal" class="money" id="v-monto" placeholder="0,00"></div></div>
                 <div class="field full"><label for="v-cliente">Cliente</label><input type="text" id="v-cliente" placeholder="Nombre y apellido"></div>
-                <div class="field"><label for="v-concepto">Concepto</label><select id="v-concepto"><option value="">Elegir…</option><option value="Ahorro">Ahorro</option><option value="Venta">Venta</option><option value="Incremento">Incremento</option><option value="Cuota">Cuota</option><option value="Reserva">Reserva</option></select></div>
+                <div class="field"><label for="v-concepto">Concepto</label><select id="v-concepto" aria-describedby="v-concepto-ayuda"><option value="">Elegir…</option><option value="Ahorro" title="Cuando la persona deja ahorros">Ahorro</option><option value="Venta" title="Cuando el pago es de una venta">Venta</option><option value="Incremento" title="Solo el dinero de un incremento de una venta">Incremento</option><option value="Reserva" title="Cuando es la reserva de una venta">Reserva</option><option value="Cuota" title="El abono de la cuota mensual de un cliente">Cuota</option></select><small id="v-concepto-ayuda">Elegir qué tipo de pago es.</small></div>
                 <div class="field"><label for="v-recibo">N° de recibo</label><input type="text" id="v-recibo" placeholder="Opcional"></div>
               </div>
               <div id="venta-msg" hidden></div>
@@ -454,6 +454,23 @@ details.anuladas .tablewrap{margin-top:8px}
         </section>
       </div>
 
+      <!-- Tesorería Caseros -->
+      <div id="p-caseros" class="view" hidden>
+        <section class="saldo">
+          <div><div class="eyebrow">Recibido de Tesorería Liniers en <span id="c-mes"></span></div><div class="bigs" id="c-recibido"></div><div class="muted" id="c-recibido-d" style="font-size:13px;margin-top:6px"></div></div>
+          <div class="who"><strong id="c-resp"></strong><span class="muted" style="font-size:13px">Tesorería Caseros (Principal)</span><button type="button" class="link" id="btn-editar-perfil-c" style="padding-right:0">Editar perfil</button></div>
+        </section>
+        <section class="panel" aria-labelledby="t-c-pend">
+          <div class="panel-h"><h2 id="t-c-pend">Entregas por recibir</h2><span class="eyebrow">Contar el efectivo antes de aceptar</span></div>
+          <div id="c-msg" hidden></div>
+          <div class="tablewrap"><table class="wide"><thead><tr><th>N° y fecha</th><th>Movimiento</th><th>A nombre de</th><th>Responsables</th><th class="amt">Monto</th><th>Estado</th><th class="amt">Acciones</th></tr></thead><tbody id="c-pend"></tbody></table></div>
+        </section>
+        <section class="panel" aria-labelledby="t-c-hist">
+          <div class="panel-h"><h2 id="t-c-hist">Entregas recibidas</h2><span class="eyebrow">Historial</span></div>
+          <div class="tablewrap"><table class="wide"><thead><tr><th>N° y fecha</th><th>Movimiento</th><th>A nombre de</th><th>Responsables</th><th class="amt">Monto</th><th>Estado</th><th class="amt">Acciones</th></tr></thead><tbody id="c-hist"></tbody></table></div>
+        </section>
+      </div>
+
       <!-- Caja de otra persona (solo admin) -->
       <div id="p-otra" class="view" hidden>
         <div id="o-alerta" hidden></div>
@@ -471,7 +488,7 @@ details.anuladas .tablewrap{margin-top:8px}
         </section>
       </div>
 
-      <p class="note">Cada pase queda pendiente hasta que Tesorería Liniers cuenta el efectivo y lo acepta. Si lo contado no coincide con el sistema, queda registrado el faltante o sobrante. Si se anula un pase, sus ventas vuelven a la caja de origen.</p>
+      <p class="note">Cada pase o entrega queda pendiente hasta que la caja que lo recibe cuenta el efectivo y lo acepta. Si lo contado no coincide con el sistema, queda registrado el faltante o sobrante. Si se anula mientras está pendiente, lo incluido vuelve a la caja de origen.</p>
     </div>
   </div>
 </div>
@@ -546,6 +563,7 @@ details.anuladas .tablewrap{margin-top:8px}
   const configurado = !SUPABASE_URL.includes('TU-PROYECTO') && !SUPABASE_ANON_KEY.includes('TU-ANON');
   const sb = configurado && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {auth:{storageKey:'mas-duenos-caja-auth'}}) : null;
 
+  const esCaseros = () => S.cajaAsignada === 'principal';
   const entry = uid => (S.cajas[uid] = S.cajas[uid] || {uid, perfil:null, mov:[], anul:[], pases:[]});
   const mia = () => entry(S.uid);
   const chk = r => { if(r && r.error) throw r.error; return r ? r.data : null; };
@@ -559,7 +577,7 @@ details.anuladas .tablewrap{margin-top:8px}
         let qp = sb.from('caja_perfiles').select('*');
         let qm = sb.from('caja_movimientos').select('*').in('estado', ['en_caja','anulada']);
         let qx = sb.from('caja_pases').select('*').order('created_at', {ascending:false}).limit(1000);
-        if(!S.isOwner){ qp = qp.eq('id', S.uid); qm = qm.eq('owner', S.uid); qx = qx.eq('owner', S.uid); }
+        if(!S.isOwner){ qp = qp.eq('id', S.uid); qm = qm.eq('owner', S.uid); qx = esCaseros() ? qx.eq('destino','principal') : qx.eq('owner', S.uid); }
         const [perfiles, movs, pases] = (await Promise.all([qp, qm, qx])).map(chk);
         const nuevo = {};
         const ent = uid => (nuevo[uid] = nuevo[uid] || {uid, perfil:null, mov:[], anul:[], pases:[]});
@@ -726,6 +744,7 @@ details.anuladas .tablewrap{margin-top:8px}
     catch(e){ msg($('perfil-msg'),'err',errTxt(e)); }
   });
   $('perfil-cancel').addEventListener('click', () => { S.editando=false; render(); });
+  $('btn-editar-perfil-c').addEventListener('click', () => $('btn-editar-perfil').click());
   $('btn-editar-perfil').addEventListener('click', () => {
     S.editando = true; const p = S.perfil||{}; $('p-nombre').value = p.responsable||''; $('p-caja').value = S.cajaAsignada; $('p-sucursal').value = p.sucursal||'Liniers'; render();
   });
@@ -747,6 +766,16 @@ details.anuladas .tablewrap{margin-top:8px}
     for(const p of e.pases){ if(p.estado==='anulado') continue; const m = (p.movimientos||[]).find(x => norm(x.recibo)===key); if(m) return m; }
     return null;
   }
+  const AYUDA_CONCEPTO = {
+    Ahorro: 'Ahorro: cuando la persona deja ahorros.',
+    Venta: 'Venta: cuando el pago es de una venta.',
+    Incremento: 'Incremento: solo el dinero de un incremento de una venta.',
+    Reserva: 'Reserva: cuando es la reserva de una venta.',
+    Cuota: 'Cuota: el abono de la cuota mensual de un cliente.'
+  };
+  function ayudaConcepto(){ $('v-concepto-ayuda').textContent = AYUDA_CONCEPTO[$('v-concepto').value] || 'Elegir qué tipo de pago es.'; }
+  $('v-concepto').addEventListener('change', ayudaConcepto);
+  $('form-venta').addEventListener('reset', () => setTimeout(ayudaConcepto, 0));
   $('v-fecha').value = todayISO(); $('x-corte').value = todayISO();
   $('v-monto').addEventListener('blur', e => { const n = parseAR(e.target.value); e.target.value = n ? fmtPlain(n) : ''; });
   $('form-venta').addEventListener('input', () => { $('venta-msg').hidden = true; });
@@ -926,8 +955,8 @@ details.anuladas .tablewrap{margin-top:8px}
   document.addEventListener('click', ev => {
     const b = ev.target.closest('[data-act]'); if(!b) return;
     const a = b.dataset.act, uid = b.dataset.uid, id = b.dataset.id;
-    const curTab = S.isOwner ? S.tab : 'mi';
-    const msgEl = $(curTab==='mi' ? 'mi-pases-msg' : curTab.startsWith('u:') ? 'o-msg' : 'res-msg');
+    const curTab = S.isOwner ? S.tab : (esCaseros() ? 'caseros' : 'mi');
+    const msgEl = $(curTab==='mi' ? 'mi-pases-msg' : curTab==='caseros' ? 'c-msg' : curTab.startsWith('u:') ? 'o-msg' : 'res-msg');
     if(a==='tab'){ S.tab = b.dataset.tab; S.conf=null; render(); try{ window.scrollTo(0,0); }catch(_){} return; }
     if(a==='ir-pend'){ const t = $('t-porrecibir'); if(t && t.scrollIntoView) t.scrollIntoView({block:'start', behavior:'smooth'}); return; }
     if(a==='detalle'){ const k = uid+'|'+id; if(S.detalle.has(k)) S.detalle.delete(k); else S.detalle.add(k); render(); return; }
@@ -981,7 +1010,7 @@ details.anuladas .tablewrap{margin-top:8px}
       }
       else if(conf) acts += confBox(uid, p.numero, '¿Anular? Las ventas vuelven a la caja.');
       else {
-        if(S.isOwner) acts += '<button type="button" class="small" data-act="recibir" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Marcar recibido</button>';
+        if((S.isOwner && p.destino==='tesoreria') || (esCaseros() && p.destino==='principal')) acts += '<button type="button" class="small" data-act="recibir" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Marcar recibido</button>';
         if(puedeAnular) acts += '<button type="button" class="small link" data-act="anular" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Anular</button>';
       }
     }
@@ -989,7 +1018,7 @@ details.anuladas .tablewrap{margin-top:8px}
       : p.estado==='anulado' ? '<span class="pill anulado">Anulado</span>' : '<span class="pill pendiente">Pendiente</span>';
     const n = (p.movimientos||[]).length;
     return '<tr class="'+esc(p.estado)+'"><td><span class="num">'+esc(p.numero)+'</span><span class="sub">'+fdate(p.fecha)+'</span></td>'+
-      '<td>'+esc(CAJAS[p.origen])+' → '+esc(CAJAS[p.destino])+'<span class="sub">'+n+(n===1?' venta':' ventas')+(p.modo==='elegir' ? (n===1?' elegida':' elegidas') : ' hasta el '+fdate(p.corte))+'</span></td>'+
+      '<td>'+esc(CAJAS[p.origen])+' → '+esc(CAJAS[p.destino])+'<span class="sub">'+n+(p.destino==='principal' ? (n===1?' movimiento':' movimientos') : (n===1?' venta':' ventas'))+(p.modo==='elegir' ? (p.destino==='principal' ? (n===1?' elegido':' elegidos') : (n===1?' elegida':' elegidas')) : ' hasta el '+fdate(p.corte))+'</span></td>'+
       '<td>'+esc(p.nombre)+(p.concepto?'<span class="sub">'+esc(p.concepto)+'</span>':'')+'</td>'+
       '<td>'+esc(p.entrega)+'<span class="sub">recibe '+esc(p.recibe)+'</span></td>'+
       '<td class="amt">'+totHTML(p.totales||{})+'</td><td>'+estado+'</td><td><div class="rowact">'+acts+'</div></td></tr>'+
@@ -1050,9 +1079,9 @@ details.anuladas .tablewrap{margin-top:8px}
     const q = norm($('q').value); const box = $('q-res');
     if(q.length < 2){ box.hidden = true; box.innerHTML = ''; return; }
     const res = [];
-    const fuentes = S.isOwner ? Object.values(S.cajas).filter(e => e.perfil) : [mia()];
+    const fuentes = S.isOwner ? Object.values(S.cajas).filter(e => e.perfil && e.perfil.caja!=='principal') : (esCaseros() ? Object.values(S.cajas) : [mia()]);
     fuentes.forEach(e => {
-      const caja = e.perfil ? CAJAS[e.perfil.caja] + ' · ' + e.perfil.responsable : '';
+      const caja = e.perfil ? CAJAS[e.perfil.caja] + ' · ' + e.perfil.responsable : 'Tesorería Liniers';
       const ok = m => norm(m.cliente).includes(q) || norm(m.recibo).includes(q);
       e.mov.filter(ok).forEach(m => res.push({caja, m, estado:'<span class="pill pendiente">En caja</span>'}));
       (e.anul||[]).filter(ok).forEach(m => res.push({caja, m, estado:'<span class="pill anulado">Anulada</span>'+(m.motivo?'<span class="sub">'+esc(m.motivo)+'</span>':'')}));
@@ -1105,7 +1134,7 @@ details.anuladas .tablewrap{margin-top:8px}
     return s ? s.split(' · ').map(x => '<span class="dif" style="display:block">'+esc(cap(x))+'</span>').join('') : 'Ninguna';
   }
   function renderResumen(){
-    const lista = Object.values(S.cajas).filter(e => e.perfil).sort((a,b) => (a.perfil.caja==='tesoreria'?0:1)-(b.perfil.caja==='tesoreria'?0:1));
+    const lista = Object.values(S.cajas).filter(e => e.perfil && e.perfil.caja!=='principal').sort((a,b) => (a.perfil.caja==='tesoreria'?0:1)-(b.perfil.caja==='tesoreria'?0:1));
     const todos = lista.flatMap(e => e.pases); const mes = todayISO().slice(0,7);
     const mesNombre = new Date().toLocaleDateString('es-AR', {month:'long', year:'numeric'});
     const mesRecibido = p => p.estado==='recibido' && isoLocal(p.recibidoAt).slice(0,7)===mes;
@@ -1162,8 +1191,23 @@ details.anuladas .tablewrap{margin-top:8px}
       $('res-cards').innerHTML = '<table class="wide estado"><thead><tr><th>Caja</th><th class="amt">Efectivo actual</th><th class="amt">Vendido</th><th class="amt">Entró por pases</th><th class="amt">Salió (pases y entregas)</th><th class="amt">Diferencias</th><th class="amt">Pendientes</th></tr></thead>'+
         '<tbody>'+filas+'</tbody><tfoot><tr><td>Total</td>'+celda(efectivo)+celda(vendido)+'<td></td><td></td><td></td><td></td></tr></tfoot></table>';
     }
-    const pend = todos.filter(p => p.estado==='pendiente');
+    const pend = todos.filter(p => p.estado==='pendiente' && p.destino==='tesoreria');
     $('res-pend').innerHTML = pend.length ? pend.map(p => rowPase(p)).join('') : emptyRow(7,'No hay pases por recibir','Cuando una caja pasa su efectivo, el pase aparece acá para contarlo y aceptarlo.');
+  }
+  function renderCaseros(){
+    const mes = todayISO().slice(0,7);
+    const entregas = Object.values(S.cajas).flatMap(e => e.pases).filter(p => p.destino==='principal').sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+    const pend = entregas.filter(p => p.estado==='pendiente');
+    const hist = entregas.filter(p => p.estado!=='pendiente');
+    const recMes = hist.filter(p => p.estado==='recibido' && isoLocal(p.recibidoAt).slice(0,7)===mes);
+    const t = {ARS:0, USD:0}; recMes.forEach(p => MONS.forEach(k => { t[k] += ((p.contado || p.totales || {})[k]) || 0; }));
+    $('c-mes').textContent = new Date().toLocaleDateString('es-AR', {month:'long'});
+    $('c-recibido').innerHTML = MONS.map(k => '<div class="big"><span class="cur">'+MON[k].nombre+'</span>'+fmt(r2(t[k]),k)+'</div>').join('');
+    const nDif = recMes.filter(p => p.conDiferencia).length;
+    $('c-recibido-d').textContent = recMes.length + (recMes.length===1 ? ' entrega recibida' : ' entregas recibidas') + (nDif ? ' · ' + nDif + ' con diferencia' : '') + ' · ' + (pend.length ? pend.length + ' por recibir' : 'nada por recibir');
+    $('c-resp').textContent = S.perfil.responsable;
+    $('c-pend').innerHTML = pend.length ? pend.map(p => rowPase(p)).join('') : emptyRow(7, 'No hay entregas por recibir', 'Cuando Tesorería Liniers registre una entrega, aparece acá para contarla y aceptarla.');
+    $('c-hist').innerHTML = hist.length ? hist.map(p => rowPase(p)).join('') : emptyRow(7, 'Todavía no hay entregas recibidas', 'Las entregas que acepte quedan acá con su conteo.');
   }
   function renderOtra(uid){
     const e = S.cajas[uid]; if(!e || !e.perfil){ S.tab='resumen'; return renderResumen(); }
@@ -1181,8 +1225,13 @@ details.anuladas .tablewrap{margin-top:8px}
     const t = $('tabs'); const mi = mia();
     const corto = e => fmt(tot(enCaja(e)).ARS,'ARS').replace(/,00$/,'');
     const grupo = html => '<div class="nav-group">' + html + '</div>';
+    if(esCaseros()){
+      const n = Object.values(S.cajas).flatMap(e => e.pases).filter(p => p.destino==='principal' && p.estado==='pendiente').length;
+      t.innerHTML = '<div class="nav-label">Mi caja</div>' + grupo(navItem('caseros', 'Tesorería Caseros', n ? (n===1 ? '1 entrega por recibir' : n+' entregas por recibir') : 'Entregas de Liniers', n ? '<span class="nav-badge">'+n+'</span>' : ''));
+      return;
+    }
     if(!S.isOwner){ t.innerHTML = '<div class="nav-label">Mi caja</div>' + grupo(navItem('mi', CAJAS[S.perfil.caja], corto(mi) + ' en caja')); return; }
-    const otros = Object.values(S.cajas).filter(e => e.perfil && e.uid!==S.uid);
+    const otros = Object.values(S.cajas).filter(e => e.perfil && e.uid!==S.uid && e.perfil.caja!=='principal');
     const pendientes = otros.reduce((n,e) => n + e.pases.filter(p => p.estado==='pendiente').length, 0);
     let h = '<div class="nav-label">General</div>' + grupo(navItem('resumen', 'Resumen', 'Todas las cajas', pendientes ? '<span class="nav-badge" title="Pases por recibir">'+pendientes+'</span>' : ''));
     h += '<div class="nav-label">Mi caja</div>' + grupo(navItem('mi', CAJAS[S.perfil.caja], corto(mi) + ' en caja'));
@@ -1209,6 +1258,7 @@ details.anuladas .tablewrap{margin-top:8px}
     const hoy = new Date().toLocaleDateString('es-AR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
     let titulo = 'Resumen', crumb = hoy.charAt(0).toUpperCase() + hoy.slice(1), sub = '';
     if(tab==='resumen'){ titulo = 'Resumen'; sub = ''; }
+    else if(tab==='caseros'){ titulo = 'Tesorería Caseros'; sub = 'Entregas de Tesorería Liniers: cuente el efectivo de cada una y acéptela. Si no coincide, queda registrado el faltante o sobrante.'; }
     else if(tab==='mi'){ titulo = 'Caja ' + CAJAS[S.perfil.caja]; sub = S.perfil.caja==='tesoreria' ? 'Sus ventas y los pases que aceptó, hasta que los entregue a la Tesorería Caseros.' : 'Cargue las ventas de su caja y, cuando corresponda, páselas a Tesorería Liniers con su comprobante.'; }
     else { const e = S.cajas[tab.slice(2)]; if(e && e.perfil){ titulo = 'Caja ' + CAJAS[e.perfil.caja]; sub = 'Vista de control de la caja a cargo de ' + e.perfil.responsable + '.'; } }
     $('view-title').textContent = titulo; $('crumb').textContent = crumb; $('sub').textContent = sub; $('sub').hidden = !sub;
@@ -1222,6 +1272,7 @@ details.anuladas .tablewrap{margin-top:8px}
       $('v-login').hidden=true; $('v-espera').hidden=true; $('v-app').hidden=true; $('v-perfil').hidden=false;
       $('perfil-cancel').hidden = !S.editando;
       $('p-caja').value = S.cajaAsignada; $('p-caja').disabled = true;
+      if(S.perfil===null && S.cajaAsignada==='principal' && $('p-sucursal').value==='Liniers') $('p-sucursal').value = 'Caseros';
       if(S.perfil===null && !$('p-nombre').value && S.nombreAsignado) $('p-nombre').value = S.nombreAsignado;
       syncShell();
       return;
@@ -1229,10 +1280,10 @@ details.anuladas .tablewrap{margin-top:8px}
     $('v-login').hidden=true; $('v-espera').hidden=true; $('v-perfil').hidden=true; $('v-app').hidden=false;
     syncShell();
     renderTabs();
-    const tab = S.isOwner ? S.tab : 'mi';
+    const tab = S.isOwner ? S.tab : (esCaseros() ? 'caseros' : 'mi');
     setTitulos(tab);
-    $('p-resumen').hidden = tab!=='resumen'; $('p-mi').hidden = tab!=='mi'; $('p-otra').hidden = !tab.startsWith('u:');
-    if(tab==='resumen') renderResumen(); else if(tab==='mi') renderMi(); else renderOtra(tab.slice(2));
+    $('p-resumen').hidden = tab!=='resumen'; $('p-mi').hidden = tab!=='mi'; $('p-otra').hidden = !tab.startsWith('u:'); $('p-caseros').hidden = tab!=='caseros';
+    if(tab==='resumen') renderResumen(); else if(tab==='mi') renderMi(); else if(tab==='caseros') renderCaseros(); else renderOtra(tab.slice(2));
     renderBusqueda();
     const fe = S.conf && S.focusId ? $(S.focusId) : null;
     if(fe && document.activeElement!==fe){ fe.focus(); try{ fe.setSelectionRange(fe.value.length, fe.value.length); }catch(_){} }
@@ -1241,6 +1292,12 @@ details.anuladas .tablewrap{margin-top:8px}
   /* ---------- arranque ---------- */
   function mostrarLogin(){
     S.uid = null; S.isOwner = false; S.cajaAsignada = null; S.perfil = undefined; S.cajas = {}; S.conf = null;
+    // Limpiar lo que dejó la persona anterior en esta computadora.
+    ['form-perfil','form-venta','form-pase'].forEach(id => $(id).reset());
+    $('p-sucursal').value = 'Liniers'; $('v-fecha').value = todayISO(); $('x-corte').value = todayISO();
+    clearDesglose(); S.elegidas.clear(); S.detalle.clear(); S.prevOpen.clear(); S.tab = 'mi'; S.editando = false;
+    $('q').value = ''; $('q-res').hidden = true; $('q-res').innerHTML = '';
+    ['venta-msg','pase-msg','perfil-msg','mi-pases-msg','res-msg','o-msg','c-msg'].forEach(id => { $(id).hidden = true; });
     $('v-espera').hidden = true; $('v-perfil').hidden = true; $('v-app').hidden = true; $('v-login').hidden = false; cerrarPass(); syncShell();
     setStatus('off', 'Sin sesión');
   }
@@ -1258,7 +1315,7 @@ details.anuladas .tablewrap{margin-top:8px}
     catch(e){ espera('No se pudo verificar el acceso', 'Revisar la conexión y recargar la página. (' + (e.message||'error') + ')'); setStatus('off','Sin conexión'); return; }
     if(!acceso){ espera('Este usuario no tiene una caja asignada', 'Pedir a Tesorería Liniers que le dé acceso a la página de caja.'); setStatus('off','Sin acceso'); return; }
     S.cajaAsignada = acceso.caja; S.isOwner = !!acceso.admin; S.nombreAsignado = acceso.responsable || '';
-    S.tab = S.isOwner ? 'resumen' : 'mi';
+    S.tab = S.isOwner ? 'resumen' : (esCaseros() ? 'caseros' : 'mi');
     await cargar();
   }
   $('form-login').addEventListener('submit', async ev => {
