@@ -285,7 +285,8 @@ tr:last-child td{border-bottom:0}
 .amt{text-align:right}
 td.amt, td.amt span, td:first-child > .num{white-space:nowrap}
 td .sub{display:block;font-size:12px;color:var(--muted);margin-top:1px}
-tr.anulado td{color:var(--muted)} tr.anulado .amt{text-decoration:line-through}
+tr.anulado td, tr.devuelto td{color:var(--muted)} tr.anulado .amt, tr.devuelto td.amt{text-decoration:line-through}
+td .sub.motivo-dev{color:var(--danger);white-space:normal;max-width:240px}
 tfoot td{font-weight:700;background:var(--head);border-top:1px solid var(--line-2)}
 .pill{display:inline-block;font-size:12px;font-weight:600;padding:0 6px;line-height:19px;border-radius:3px;border:1px solid;white-space:nowrap}
 .pill.pendiente{background:var(--warn-soft);color:var(--warn)}
@@ -371,7 +372,7 @@ details.anuladas .tablewrap{margin-top:8px}
 
       <button type="button" class="link gate-out" id="btn-salir-gate" hidden>Cerrar sesión</button>
       <div class="gate-foot"><span>Tesorería Liniers · Onboarding · Retención</span><span>Spazios</span></div>
-      <div class="version">Versión 2026-11-06 · carpetas por entrega</div>
+      <div class="version">Versión 2026-11-06 b · devolver pases</div>
       <div class="tema" role="group" aria-label="Apariencia" data-tema-grupo style="max-width:260px">
         <button type="button" data-tema="light">Claro</button><button type="button" data-tema="dark">Oscuro</button><button type="button" data-tema="auto">Automático</button>
       </div>
@@ -394,7 +395,7 @@ details.anuladas .tablewrap{margin-top:8px}
         <button type="button" data-tema="light">Claro</button><button type="button" data-tema="dark">Oscuro</button><button type="button" data-tema="auto">Automático</button>
       </div>
       <div class="status" id="status"><span class="dot"></span><span>Conectando…</span></div>
-      <div class="version">Versión 2026-11-06 · carpetas por entrega</div>
+      <div class="version">Versión 2026-11-06 b · devolver pases</div>
     </div>
   </aside>
   <div class="scrim" id="scrim" hidden></div>
@@ -527,7 +528,7 @@ details.anuladas .tablewrap{margin-top:8px}
           <div class="tablewrap"><table class="wide"><thead><tr><th>N° y fecha</th><th>Movimiento</th><th>A nombre de</th><th>Responsables</th><th class="amt">Monto</th><th>Estado</th><th class="amt">Acciones</th></tr></thead><tbody id="c-pend"></tbody></table></div>
         </section>
         <section class="panel" aria-labelledby="t-c-hist">
-          <div class="panel-h"><h2 id="t-c-hist">Entregas recibidas</h2><span class="eyebrow">Historial</span></div>
+          <div class="panel-h"><h2 id="t-c-hist">Entregas recibidas y devueltas</h2><span class="eyebrow">Historial</span></div>
           <div class="tablewrap"><table class="wide"><thead><tr><th>N° y fecha</th><th>Movimiento</th><th>A nombre de</th><th>Responsables</th><th class="amt">Monto</th><th>Estado</th><th class="amt">Acciones</th></tr></thead><tbody id="c-hist"></tbody></table></div>
         </section>
       </div>
@@ -549,7 +550,7 @@ details.anuladas .tablewrap{margin-top:8px}
         </section>
       </div>
 
-      <p class="note">Cada pase o entrega queda pendiente hasta que la caja que lo recibe cuenta el efectivo y lo acepta. Si lo contado no coincide con el sistema, queda registrado el faltante o sobrante. Si se anula mientras está pendiente, lo incluido vuelve a la caja de origen.</p>
+      <p class="note">Cada pase o entrega queda pendiente hasta que la caja que lo recibe cuenta el efectivo y lo acepta. Si lo contado no coincide con el sistema, queda registrado el faltante o sobrante. Si no coincide, quien recibe lo puede devolver con el motivo; si se anula o se devuelve mientras está pendiente, lo incluido vuelve a la caja de origen para corregirlo y pasarlo de nuevo.</p>
     </div>
   </div>
 </div>
@@ -629,7 +630,8 @@ details.anuladas .tablewrap{margin-top:8px}
   const mia = () => entry(S.uid);
   const chk = r => { if(r && r.error) throw r.error; return r ? r.data : null; };
   const movFromRow = r => Object.assign({}, r.data, {id:r.id, owner:r.owner, estado:r.estado, pase:r.pase, motivo:r.motivo, anuladaAt:r.anulada_at});
-  const paseFromRow = r => Object.assign({}, r.data, r.recepcion||{}, r.anulacion||{}, {numero:r.numero, estado:r.estado, destino:r.destino, uidCaja:r.owner, entregado:r.entregado||{}});
+  const paseVigente = p => p.estado!=='anulado' && p.estado!=='devuelto';
+  const paseFromRow = r =>Object.assign({}, r.data, r.recepcion||{}, r.anulacion||{}, {numero:r.numero, estado:r.estado, destino:r.destino, uidCaja:r.owner, entregado:r.entregado||{}});
   let cargando = null;
   async function cargar(){
     if(cargando) return cargando;
@@ -738,7 +740,10 @@ details.anuladas .tablewrap{margin-top:8px}
     doc.text('Responsable caja ' + CAJAS[p.origen] + ' - firma y aclaración', L, ys+8.5);
     doc.text('Responsable caja ' + CAJAS[p.destino] + ' - firma y aclaración', R-74, ys+8.5);
     doc.setFontSize(7); doc.setTextColor(140);
-    if(p.estado==='recibido'){
+    if(p.estado==='devuelto'){
+      doc.setFont('helvetica','bold'); doc.setTextColor(150,30,30);
+      doc.text(doc.splitTextToSize('DEVUELTO el ' + new Date(p.devueltoAt || Date.now()).toLocaleDateString('es-AR') + (p.devueltoPorNombre ? ' por ' + p.devueltoPorNombre : '') + '. Motivo: ' + (p.motivoDev || '—') + '. Este comprobante no tiene validez.', W)[0], L, y0+142);
+    } else if(p.estado==='recibido'){
       const cont = MONS.filter(k => (p.totales||{})[k] > 0).map(k => fmt((p.contado||p.totales)[k]||0, k)).join(' / ');
       let f = 'Emitido ' + new Date(p.createdAt || Date.now()).toLocaleString('es-AR') + '. Recibido el ' + new Date(p.recibidoAt || Date.now()).toLocaleDateString('es-AR') + '. Contado: ' + cont + '.';
       if(p.conDiferencia){ doc.setFont('helvetica','bold'); doc.setTextColor(150,30,30); f += ' Diferencia con sistema: ' + difTexto(p) + '.'; }
@@ -799,6 +804,7 @@ details.anuladas .tablewrap{margin-top:8px}
     const m = (e && (e.message||'')) || '';
     if((e && e.code==='42501') || /row-level security|permission denied/i.test(m)) return 'Este usuario no tiene permiso para esta acción.';
     if(e && e.code==='23505') return 'Ese número ya existe. Intentar de nuevo.';
+    if(e && e.code==='23514') return 'Falta actualizar la base de datos: ejecutar el archivo supabase.sql nuevo en Supabase (SQL Editor) y volver a intentar.';
     return 'No se pudo guardar. Revisar la conexión e intentar de nuevo.' + (m ? ' (' + m + ')' : '');
   }
 
@@ -815,10 +821,10 @@ details.anuladas .tablewrap{margin-top:8px}
     S.editando = true; const p = S.perfil||{}; $('p-nombre').value = p.responsable||''; $('p-caja').value = S.cajaAsignada; $('p-sucursal').value = p.sucursal||'Liniers'; render();
   });
 
-  // Todas las ventas cargadas en la caja que siguen vigentes: en caja o dentro de un pase no anulado.
+  // Todas las ventas cargadas en la caja que siguen vigentes: en caja o dentro de un pase no anulado ni devuelto.
   function ventasVigentes(e){
     const out = e.mov.filter(m => m.tipo!=='pase');
-    e.pases.forEach(p => { if(p.estado!=='anulado') (p.movimientos||[]).forEach(m => { if(m.tipo!=='pase') out.push(m); }); });
+    e.pases.forEach(p => { if(paseVigente(p)) (p.movimientos||[]).forEach(m => { if(m.tipo!=='pase') out.push(m); }); });
     return out;
   }
   const normCli = t => String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
@@ -829,7 +835,7 @@ details.anuladas .tablewrap{margin-top:8px}
   function reciboExistente(e, key){
     const norm = r => String(r||'').toUpperCase().replace(/\s+/g,'');
     const enCaja = e.mov.find(m => norm(m.recibo)===key); if(enCaja) return enCaja;
-    for(const p of e.pases){ if(p.estado==='anulado') continue; const m = (p.movimientos||[]).find(x => norm(x.recibo)===key); if(m) return m; }
+    for(const p of e.pases){ if(!paseVigente(p)) continue; const m = (p.movimientos||[]).find(x => norm(x.recibo)===key); if(m) return m; }
     return null;
   }
   const AYUDA_CONCEPTO = {
@@ -985,7 +991,7 @@ details.anuladas .tablewrap{margin-top:8px}
     await descargar(p, $('pase-msg'));
   });
 
-  async function accionPase(uid, numero, tipo, msgEl){
+  async function accionPase(uid, numero, tipo, msgEl, motivo){
     const e = S.cajas[uid]; const p = e && e.pases.find(x => x.numero===numero); if(!p) return;
     const now = new Date().toISOString();
     let patch = null;
@@ -1005,7 +1011,13 @@ details.anuladas .tablewrap{margin-top:8px}
     }
     S.conf = null; S.conteo = {}; S.focusId = null;
     try{
-      if(patch){
+      if(tipo==='devolver'){
+        const quien = (S.perfil && S.perfil.responsable) || '';
+        // La base de datos devuelve las ventas a la caja de origen al marcar el pase como devuelto.
+        chk(await sb.from('caja_pases').update({estado:'devuelto', recepcion:{devueltoAt:now, devueltoPor:S.uid, devueltoPorNombre:quien, motivoDev:motivo}}).eq('numero', numero));
+        msg(msgEl, 'ok', (p.destino==='principal' ? 'Entrega ' : 'Pase ') + numero + ' devuelto. ' + (p.destino==='principal' ? 'Tesorería Liniers' : 'La caja ' + CAJAS[p.origen]) + ' lo ve con el motivo y tiene las ventas de nuevo en su caja para corregir y volver a pasar.');
+      }
+      else if(patch){
         const {estado, ...recepcion} = patch; chk(await sb.from('caja_pases').update({estado, recepcion}).eq('numero', numero));
         msg(msgEl, patch.conDiferencia ? 'info' : 'ok', patch.conDiferencia ? 'Pase '+numero+' recibido con diferencia: '+difTexto(patch)+'.' : 'Pase '+numero+' recibido sin diferencias.');
       }
@@ -1041,10 +1053,10 @@ details.anuladas .tablewrap{margin-top:8px}
       return;
     }
     if(a==='pdf'){ const p = (S.cajas[uid]||{pases:[]}).pases.find(x => x.numero===id); if(p) descargar(p, msgEl); return; }
-    if(a==='recibir' || a==='anular' || a==='anularv'){
+    if(a==='recibir' || a==='anular' || a==='anularv' || a==='devolver'){
       S.conf = {key:uid+'|'+id, accion:a}; S.motivo=''; S.conteo={}; S.difOk=null; msgEl.hidden=true;
       if(a==='recibir'){ const e=S.cajas[uid]; const p=e&&e.pases.find(x=>x.numero===id); const k=MONS.find(k=>p&&(p.totales||{})[k]>0); S.focusId = k ? 'conteo-'+k : null; }
-      else S.focusId = a==='anularv' ? 'motivo-input' : null;
+      else S.focusId = (a==='anularv' || a==='devolver') ? 'motivo-input' : null;
       render(); return;
     }
     if(a==='no'){ S.conf = null; S.focusId = null; S.difOk = null; render(); return; }
@@ -1058,6 +1070,11 @@ details.anuladas .tablewrap{margin-top:8px}
       if(c.accion==='cp-anular'){ S.conf = null; cpAccion('anular', id); render(); return; }
       if(c.accion==='cp-todas'){ S.conf = null; cpAccion('todas', id); render(); return; }
       if(c.accion==='cp-anular-entrega'){ S.conf = null; cpAccion('anular-entrega', id); render(); return; }
+      if(c.accion==='devolver'){
+        const motivo = (S.motivo||'').trim();
+        if(!motivo){ const i=$('motivo-input'); if(i){ i.focus(); i.setAttribute('aria-invalid','true'); i.placeholder='El motivo es obligatorio'; } return; }
+        S.motivo=''; accionPase(uid, id, 'devolver', msgEl, motivo); return;
+      }
       if(c.accion==='anularv'){
         const motivo = (S.motivo||'').trim();
         if(!motivo){ const i=$('motivo-input'); if(i){ i.focus(); i.setAttribute('aria-invalid','true'); i.placeholder='El motivo es obligatorio'; } return; }
@@ -1090,13 +1107,19 @@ details.anuladas .tablewrap{margin-top:8px}
         acts += '<span class="conteo">'+mons.map(k => '<label class="conteo-f" for="conteo-'+k+'"><span>'+MON[k].nombre+' contados</span><input type="text" inputmode="decimal" class="money" id="conteo-'+k+'" placeholder="Sistema: '+fmt(p.totales[k],k)+'" value="'+esc(S.conteo[k]||'')+'"></label>').join('')+
           '<span class="confirmbox"><button type="button" class="small primary" data-act="si" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Confirmar recibido</button><button type="button" class="small" data-act="no">Cancelar</button></span></span>';
       }
+      else if(conf && S.conf.accion==='devolver'){
+        acts += '<span class="confirmbox"><input type="text" id="motivo-input" class="motivo" placeholder="Qué está mal (ej.: faltan $5.000, recibo repetido)" value="'+esc(S.motivo||'')+'" aria-label="Motivo de la devolución"><button type="button" class="small primary" data-act="si" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Devolver</button><button type="button" class="small" data-act="no">Cancelar</button></span>';
+      }
       else if(conf) acts += confBox(uid, p.numero, '¿Anular? Las ventas vuelven a la caja.');
       else {
-        if((S.isOwner && p.destino==='tesoreria') || (esCaseros() && p.destino==='principal')) acts += '<button type="button" class="small" data-act="recibir" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Marcar recibido</button>';
-        if(puedeAnular) acts += '<button type="button" class="small link" data-act="anular" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Anular</button>';
+        const recibe = (S.isOwner && p.destino==='tesoreria') || (esCaseros() && p.destino==='principal');
+        if(recibe) acts += '<button type="button" class="small" data-act="recibir" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Marcar recibido</button>'+
+          '<button type="button" class="small link" data-act="devolver" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'" title="No coincide: se devuelve para que lo corrijan">Devolver</button>';
+        if(puedeAnular && !(recibe && uid!==S.uid)) acts += '<button type="button" class="small link" data-act="anular" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Anular</button>';
       }
     }
     const estado = p.estado==='recibido' ? (p.conDiferencia ? '<span class="pill diferencia">Recibido con diferencia</span><span class="sub dif">'+esc(cap(difTexto(p)))+'</span>' : '<span class="pill recibido">Recibido</span>')+(p.recibidoAt?'<span class="sub">'+new Date(p.recibidoAt).toLocaleDateString('es-AR')+'</span>':'')
+      : p.estado==='devuelto' ? '<span class="pill anulado">Devuelto</span>'+(p.motivoDev?'<span class="sub motivo-dev">'+esc(p.motivoDev)+'</span>':'')+(p.devueltoAt?'<span class="sub">'+new Date(p.devueltoAt).toLocaleDateString('es-AR')+(p.devueltoPorNombre?' · '+esc(p.devueltoPorNombre):'')+'</span>':'')
       : p.estado==='anulado' ? '<span class="pill anulado">Anulado</span>' : '<span class="pill pendiente">Pendiente</span>';
     const n = (p.movimientos||[]).length;
     return '<tr class="'+esc(p.estado)+'"><td><span class="num">'+esc(p.numero)+'</span><span class="sub">'+fdate(p.fecha)+'</span></td>'+
@@ -1151,10 +1174,18 @@ details.anuladas .tablewrap{margin-top:8px}
 
   const LIMITE_ARS = 4000000;
   const superaLimite = e => tot(enCaja(e)).ARS >= LIMITE_ARS;
+  // Pases devueltos en los últimos 7 días, para avisarle a la caja que los hizo.
+  function devueltosRecientes(e){
+    const lim = Date.now() - 7*864e5;
+    return (e.pases||[]).filter(p => p.estado==='devuelto' && new Date(p.devueltoAt||0).getTime() >= lim);
+  }
   function setAlerta(id, e, propia){
-    const el = $(id); const on = e.perfil && superaLimite(e); el.hidden = !on; if(!on) return;
+    const el = $(id); const partes = [];
+    devueltosRecientes(e).forEach(p => partes.push((p.destino==='principal' ? 'Tesorería Caseros devolvió la entrega ' : 'Tesorería Liniers devolvió el pase ') + p.numero + ' (' + fmtTot(p.totales||{}) + ')' + (p.motivoDev ? ': «' + p.motivoDev + '»' : '') + '. ' + (propia ? 'Las ventas volvieron a su caja: corrija lo que haga falta y vuelva a pasarlas.' : 'Las ventas volvieron a esa caja.')));
+    if(e.perfil && superaLimite(e)) partes.push((propia ? 'Su caja tiene ' : 'La caja '+CAJAS[e.perfil.caja]+' tiene ') + fmt(tot(enCaja(e)).ARS,'ARS') + ' en efectivo y superó el límite de ' + fmt(LIMITE_ARS,'ARS') + '. ' + (e.perfil.caja!=='tesoreria' ? 'Conviene hacer el pase a Tesorería Liniers.' : 'Conviene hacer la entrega a la Tesorería Caseros (Principal).'));
+    el.hidden = !partes.length; if(!partes.length) return;
     el.className = 'msg alerta';
-    el.textContent = (propia ? 'Su caja tiene ' : 'La caja '+CAJAS[e.perfil.caja]+' tiene ') + fmt(tot(enCaja(e)).ARS,'ARS') + ' en efectivo y superó el límite de ' + fmt(LIMITE_ARS,'ARS') + '. ' + (e.perfil.caja!=='tesoreria' ? 'Conviene hacer el pase a Tesorería Liniers.' : 'Conviene hacer la entrega a la Tesorería Caseros (Principal).');
+    el.innerHTML = partes.map(t => '<div>'+esc(t)+'</div>').join('');
   }
   const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
   function renderBusqueda(){
@@ -1167,7 +1198,7 @@ details.anuladas .tablewrap{margin-top:8px}
       const ok = m => norm(m.cliente).includes(q) || norm(m.recibo).includes(q);
       e.mov.filter(ok).forEach(m => res.push({caja, m, estado:'<span class="pill pendiente">En caja</span>'}));
       (e.anul||[]).filter(ok).forEach(m => res.push({caja, m, estado:'<span class="pill anulado">Anulada</span>'+(m.motivo?'<span class="sub">'+esc(m.motivo)+'</span>':'')}));
-      e.pases.filter(p => p.estado!=='anulado').forEach(p => (p.movimientos||[]).filter(ok).forEach(m => res.push({caja, m, uid:e.uid, pase:p,
+      e.pases.filter(paseVigente).forEach(p => (p.movimientos||[]).filter(ok).forEach(m => res.push({caja, m, uid:e.uid, pase:p,
         estado:'<span class="pill '+(p.estado==='recibido'?(p.conDiferencia?'diferencia':'recibido'):'pendiente')+'">'+(p.estado==='recibido'?'Pase recibido':'Pase pendiente')+'</span><span class="sub num">'+esc(p.numero)+'</span>'})));
     });
     if(S.isOwner || esCaseros()) S.carpetas.filter(c => c.estado!=='anulada' && (S.isOwner || c.estado!=='en_sucursal') && norm(c.cliente).includes(q)).forEach(c => {
@@ -1230,7 +1261,7 @@ details.anuladas .tablewrap{margin-top:8px}
     function vendidoMes(e){
       const enMes = m => (m.fecha||'').slice(0,7)===mes;
       const propias = e.mov.filter(enMes);
-      e.pases.filter(p => p.estado!=='anulado').forEach(p => (p.movimientos||[]).forEach(m => { if(m.tipo!=='pase' && enMes(m)) propias.push(m); }));
+      e.pases.filter(paseVigente).forEach(p => (p.movimientos||[]).forEach(m => { if(m.tipo!=='pase' && enMes(m)) propias.push(m); }));
       return tot(propias);
     }
     const celda = t => '<td class="amt"><span>'+fmt(t.ARS,'ARS')+'</span><span class="usd">'+fmt(t.USD,'USD')+'</span></td>';
@@ -1249,6 +1280,7 @@ details.anuladas .tablewrap{margin-top:8px}
       const d = {ARS:0, USD:0}; conDif.forEach(p => { d.ARS += (p.diferencia||{}).ARS||0; d.USD += (p.diferencia||{}).USD||0; });
       avisos.push(['bad', 'En ' + mesNombre + ' hubo ' + (conDif.length===1 ? '1 pase recibido' : conDif.length+' pases recibidos') + ' con diferencia: ' + difTexto({diferencia:{ARS:r2(d.ARS), USD:r2(d.USD)}}) + ' en total.', '']);
     }
+    lista.forEach(e => devueltosRecientes(e).forEach(p => avisos.push(['bad', (p.destino==='principal' ? 'Tesorería Caseros devolvió la entrega ' : 'Se devolvió a ' + CAJAS[p.origen] + ' el pase ') + p.numero + ' por ' + fmtTot(p.totales||{}) + (p.motivoDev ? ': «' + p.motivoDev + '»' : '') + '. El efectivo volvió a la caja de origen.', '<button type="button" class="small" data-act="tab" data-tab="'+esc(e.uid===S.uid ? 'mi' : 'u:'+e.uid)+'">Ver caja</button>'])));
     lista.filter(superaLimite).forEach(e => avisos.push(['warn', 'La caja ' + CAJAS[e.perfil.caja] + ' tiene ' + fmt(tot(enCaja(e)).ARS,'ARS') + ' y superó el límite de ' + fmt(LIMITE_ARS,'ARS') + '.', '']));
     const cpRech = S.carpetas.filter(c => c.estado==='rechazada').length;
     if(cpRech) avisos.push(['bad', 'Tesorería Caseros devolvió ' + (cpRech===1 ? '1 carpeta' : cpRech + ' carpetas') + ' a la sucursal. Hay que corregirlas e incluirlas en la próxima entrega.', '<button type="button" class="small" data-act="tab" data-tab="carpetas">Ver carpetas</button>']);
@@ -1264,7 +1296,7 @@ details.anuladas .tablewrap{margin-top:8px}
       const filas = lista.map(e => {
         const tes = e.perfil.caja==='tesoreria';
         const pend = e.pases.filter(p => p.estado==='pendiente');
-        const salidas = e.pases.filter(p => p.estado!=='anulado' && (p.fecha||'').slice(0,7)===mes);
+        const salidas = e.pases.filter(p => paseVigente(p) && (p.fecha||'').slice(0,7)===mes);
         const entradas = tes ? recibidosMes : [];
         const difs = tes ? recibidosMes : e.pases.filter(mesRecibido);
         const tab = e.uid===S.uid ? 'mi' : 'u:'+e.uid;
