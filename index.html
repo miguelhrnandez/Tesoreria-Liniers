@@ -289,6 +289,7 @@ tr:last-child td{border-bottom:0}
 td.amt, td.amt span, td:first-child > .num{white-space:nowrap}
 td .sub{display:block;font-size:12px;color:var(--muted);margin-top:1px}
 tr.anulado td, tr.devuelto td{color:var(--muted)} tr.anulado .amt, tr.devuelto td.amt{text-decoration:line-through}
+.aviso-linea{display:flex;gap:12px;align-items:center;justify-content:space-between} .aviso-linea + .aviso-linea{margin-top:8px} .aviso-linea button{flex:none}
 td .sub.motivo-dev{color:var(--danger);white-space:normal;max-width:240px}
 tfoot td{font-weight:700;background:var(--head);border-top:1px solid var(--line-2)}
 .pill{display:inline-block;font-size:12px;font-weight:600;padding:0 6px;line-height:19px;border-radius:3px;border:1px solid;white-space:nowrap}
@@ -375,7 +376,7 @@ details.anuladas .tablewrap{margin-top:8px}
 
       <button type="button" class="link gate-out" id="btn-salir-gate" hidden>Cerrar sesión</button>
       <div class="gate-foot"><span>Tesorería Liniers · Onboarding · Retención</span><span>Spazios</span></div>
-      <div class="version">Versión 2026-11-07 · carpetas solo ventas</div>
+      <div class="version">Versión 2026-11-07 b · avisos</div>
       <div class="tema" role="group" aria-label="Apariencia" data-tema-grupo style="max-width:260px">
         <button type="button" data-tema="light">Claro</button><button type="button" data-tema="dark">Oscuro</button><button type="button" data-tema="auto">Automático</button>
       </div>
@@ -398,7 +399,7 @@ details.anuladas .tablewrap{margin-top:8px}
         <button type="button" data-tema="light">Claro</button><button type="button" data-tema="dark">Oscuro</button><button type="button" data-tema="auto">Automático</button>
       </div>
       <div class="status" id="status"><span class="dot"></span><span>Conectando…</span></div>
-      <div class="version">Versión 2026-11-07 · carpetas solo ventas</div>
+      <div class="version">Versión 2026-11-07 b · avisos</div>
     </div>
   </aside>
   <div class="scrim" id="scrim" hidden></div>
@@ -1177,17 +1178,28 @@ details.anuladas .tablewrap{margin-top:8px}
   const LIMITE_ARS = 4000000;
   const superaLimite = e => tot(enCaja(e)).ARS >= LIMITE_ARS;
   // Pases devueltos en los últimos 7 días, para avisarle a la caja que los hizo.
+  // El aviso de un pase devuelto se va solo cuando se hace un pase nuevo al mismo destino,
+  // cuando se toca «Entendido» o a los 7 días.
+  const avisosVistos = () => { try{ return JSON.parse(localStorage.getItem('caja-avisos-vistos')||'[]'); }catch(e){ return []; } };
+  function marcarAvisoVisto(numero){ try{ const v = avisosVistos().filter(x => x!==numero); v.push(numero); localStorage.setItem('caja-avisos-vistos', JSON.stringify(v.slice(-100))); }catch(e){} }
   function devueltosRecientes(e){
-    const lim = Date.now() - 7*864e5;
-    return (e.pases||[]).filter(p => p.estado==='devuelto' && new Date(p.devueltoAt||0).getTime() >= lim);
+    const lim = Date.now() - 7*864e5; const vistos = avisosVistos();
+    const ts = p => new Date(p.createdAt || p.created_at || p.fecha || 0).getTime();
+    return (e.pases||[]).filter(p => {
+      if(p.estado!=='devuelto' || vistos.includes(p.numero)) return false;
+      const t = new Date(p.devueltoAt||0).getTime();
+      if(t < lim) return false;
+      return !(e.pases||[]).some(n => n.numero!==p.numero && n.destino===p.destino && paseVigente(n) && ts(n) > t);
+    });
   }
+  const btnVisto = n => ' <button type="button" class="small" data-aviso-ok="'+esc(n)+'">Entendido</button>';
   function setAlerta(id, e, propia){
     const el = $(id); const partes = [];
-    devueltosRecientes(e).forEach(p => partes.push((p.destino==='principal' ? 'Tesorería Caseros devolvió la entrega ' : 'Tesorería Liniers devolvió el pase ') + p.numero + ' (' + fmtTot(p.totales||{}) + ')' + (p.motivoDev ? ': «' + p.motivoDev + '»' : '') + '. ' + (propia ? 'Las ventas volvieron a su caja: corrija lo que haga falta y vuelva a pasarlas.' : 'Las ventas volvieron a esa caja.')));
-    if(e.perfil && superaLimite(e)) partes.push((propia ? 'Su caja tiene ' : 'La caja '+CAJAS[e.perfil.caja]+' tiene ') + fmt(tot(enCaja(e)).ARS,'ARS') + ' en efectivo y superó el límite de ' + fmt(LIMITE_ARS,'ARS') + '. ' + (e.perfil.caja!=='tesoreria' ? 'Conviene hacer el pase a Tesorería Liniers.' : 'Conviene hacer la entrega a la Tesorería Caseros (Principal).'));
+    devueltosRecientes(e).forEach(p => partes.push([p.numero, (p.destino==='principal' ? 'Tesorería Caseros devolvió la entrega ' : 'Tesorería Liniers devolvió el pase ') + p.numero + ' (' + fmtTot(p.totales||{}) + ')' + (p.motivoDev ? ': «' + p.motivoDev + '»' : '') + '. ' + (propia ? 'Las ventas volvieron a su caja: corrija lo que haga falta y vuelva a pasarlas.' : 'Las ventas volvieron a esa caja.')]));
+    if(e.perfil && superaLimite(e)) partes.push(['', (propia ? 'Su caja tiene ' : 'La caja '+CAJAS[e.perfil.caja]+' tiene ') + fmt(tot(enCaja(e)).ARS,'ARS') + ' en efectivo y superó el límite de ' + fmt(LIMITE_ARS,'ARS') + '. ' + (e.perfil.caja!=='tesoreria' ? 'Conviene hacer el pase a Tesorería Liniers.' : 'Conviene hacer la entrega a la Tesorería Caseros (Principal).')]);
     el.hidden = !partes.length; if(!partes.length) return;
     el.className = 'msg alerta';
-    el.innerHTML = partes.map(t => '<div>'+esc(t)+'</div>').join('');
+    el.innerHTML = partes.map(([n,t]) => '<div class="aviso-linea"><span>'+esc(t)+'</span>'+(n?btnVisto(n):'')+'</div>').join('');
   }
   const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
   function renderBusqueda(){
@@ -1282,7 +1294,7 @@ details.anuladas .tablewrap{margin-top:8px}
       const d = {ARS:0, USD:0}; conDif.forEach(p => { d.ARS += (p.diferencia||{}).ARS||0; d.USD += (p.diferencia||{}).USD||0; });
       avisos.push(['bad', 'En ' + mesNombre + ' hubo ' + (conDif.length===1 ? '1 pase recibido' : conDif.length+' pases recibidos') + ' con diferencia: ' + difTexto({diferencia:{ARS:r2(d.ARS), USD:r2(d.USD)}}) + ' en total.', '']);
     }
-    lista.forEach(e => devueltosRecientes(e).forEach(p => avisos.push(['bad', (p.destino==='principal' ? 'Tesorería Caseros devolvió la entrega ' : 'Se devolvió a ' + CAJAS[p.origen] + ' el pase ') + p.numero + ' por ' + fmtTot(p.totales||{}) + (p.motivoDev ? ': «' + p.motivoDev + '»' : '') + '. El efectivo volvió a la caja de origen.', '<button type="button" class="small" data-act="tab" data-tab="'+esc(e.uid===S.uid ? 'mi' : 'u:'+e.uid)+'">Ver caja</button>'])));
+    lista.forEach(e => devueltosRecientes(e).forEach(p => avisos.push(['bad', (p.destino==='principal' ? 'Tesorería Caseros devolvió la entrega ' : 'Se devolvió a ' + CAJAS[p.origen] + ' el pase ') + p.numero + ' por ' + fmtTot(p.totales||{}) + (p.motivoDev ? ': «' + p.motivoDev + '»' : '') + '. El efectivo volvió a la caja de origen.', '<button type="button" class="small" data-act="tab" data-tab="'+esc(e.uid===S.uid ? 'mi' : 'u:'+e.uid)+'">Ver caja</button>'+btnVisto(p.numero)])));
     lista.filter(superaLimite).forEach(e => avisos.push(['warn', 'La caja ' + CAJAS[e.perfil.caja] + ' tiene ' + fmt(tot(enCaja(e)).ARS,'ARS') + ' y superó el límite de ' + fmt(LIMITE_ARS,'ARS') + '.', '']));
     const cpRech = S.carpetas.filter(c => c.estado==='rechazada').length;
     if(cpRech) avisos.push(['bad', 'Tesorería Caseros devolvió ' + (cpRech===1 ? '1 carpeta' : cpRech + ' carpetas') + ' a la sucursal. Hay que corregirlas e incluirlas en la próxima entrega.', '<button type="button" class="small" data-act="tab" data-tab="carpetas">Ver carpetas</button>']);
@@ -1623,6 +1635,7 @@ details.anuladas .tablewrap{margin-top:8px}
     $('u-nombre').textContent = S.perfil.responsable; $('u-ini').textContent = iniciales(S.perfil.responsable);
     $('u-caja').textContent = (S.isOwner ? 'Administrador · ' : '') + CAJAS[S.perfil.caja];
   }
+  document.addEventListener('click', ev => { const b = ev.target.closest('[data-aviso-ok]'); if(!b) return; marcarAvisoVisto(b.getAttribute('data-aviso-ok')); render(); });
   function render(){
     if(S.perfil===undefined) return;
     if(S.perfil===null || S.editando){
