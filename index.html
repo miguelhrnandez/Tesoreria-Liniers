@@ -474,6 +474,15 @@ tfoot td{font-weight:600;background:var(--head);border-top:1px solid var(--card-
 tr.det > td{background:var(--head)!important;padding:0 24px 14px}
 table.mini{border-radius:10px;overflow:hidden;border-color:var(--card-line)}
 table.mini th, table.mini td{padding:6px 10px}
+tbody tr.pase-h td{background:var(--sel-2);border-top:1px solid var(--card-line)}
+tbody tr.pase-h:hover td{background:var(--sel-2)}
+tr.pase-h .sub{display:block;font-size:12.5px;color:var(--muted)}
+.pase-tog{margin-top:2px;padding:2px 0!important;font-size:12.5px;font-weight:600}
+tbody tr.pase-d td{font-size:13px;color:var(--ink-2);padding-top:8px;padding-bottom:8px;background:var(--sel-2)}
+tr.pase-d td:nth-child(2){padding-left:40px;position:relative}
+tr.pase-d td:nth-child(2)::before{content:"";position:absolute;left:26px;top:0;bottom:0;border-left:2px solid var(--card-line)}
+tr.pase-d.dif td{color:var(--danger)}
+tr.pase-d + tr:not(.pase-d) td{border-top:1px solid var(--card-line)}
 .pill{border:0;border-radius:999px;padding:3px 10px;line-height:1.35;font-size:12.5px;display:inline-flex;align-items:center;gap:6px}
 .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
 .tag{background:var(--hover);color:var(--ink-2);border:0;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:500;margin-left:0}
@@ -606,7 +615,7 @@ details.st-tabla .tablewrap{margin-top:10px}
 
       <button type="button" class="link gate-out" id="btn-salir-gate" hidden>Cerrar sesión</button>
       <div class="gate-foot"><span>Tesorería Liniers · Onboarding · Retención</span><span>Spazios</span></div>
-      <div class="version">Versión 2026-11-07 e · estadísticas</div>
+      <div class="version">Versión 2026-11-11 · detalle de pases en caja</div>
       <div class="tema-fila" style="max-width:260px"><span class="tema-lbl">Apariencia<small data-tema-txt></small></span><div class="tema ico-tema" role="group" aria-label="Apariencia" data-tema-grupo>
         <button type="button" data-tema="light" aria-label="Claro" title="Claro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><button type="button" data-tema="dark" aria-label="Oscuro" title="Oscuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button><button type="button" data-tema="auto" aria-label="Automático" title="Automático (según el equipo)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button></div>
       </div>
@@ -630,7 +639,7 @@ details.st-tabla .tablewrap{margin-top:10px}
         <button type="button" data-tema="light" aria-label="Claro" title="Claro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><button type="button" data-tema="dark" aria-label="Oscuro" title="Oscuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button><button type="button" data-tema="auto" aria-label="Automático" title="Automático (según el equipo)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
       </div></div>
       <div class="status" id="status"><span class="dot"></span><span>Conectando…</span></div>
-      <div class="version">Versión 2026-11-07 e · estadísticas</div>
+      <div class="version">Versión 2026-11-11 · detalle de pases en caja</div>
     </div>
   </aside>
   <div class="scrim" id="scrim" hidden></div>
@@ -1429,6 +1438,7 @@ details.st-tabla .tablewrap{margin-top:10px}
     const items = enCaja(e);
     if(!items.length) return emptyRow(editable?6:5, 'No hay efectivo en caja', editable ? (esTesoreriaPropia(e) ? 'Las ventas que cargue y los pases que reciba aparecen acá hasta que los entregue a la Tesorería Caseros (Principal).' : 'Las ventas que se carguen aparecen acá hasta que se pasa la caja.') : 'El responsable todavía no cargó ventas, o ya pasó todo.');
     return items.map(m => {
+      if(m.tipo==='pase') return filasPaseRecibido(m, editable);
       let act = '';
       const solo = editable ? '<button type="button" class="small" data-act="solo" data-id="'+esc(m.id)+'">'+(esTesoreriaPropia(e) ? 'Entregar solo este' : 'Pasar solo este')+'</button>' : '';
       if(editable && m.tipo==='pase') act = '<td class="amt"><div class="rowact"><span class="pill recibido">Pase recibido</span>'+solo+'</div></td>';
@@ -1436,6 +1446,24 @@ details.st-tabla .tablewrap{margin-top:10px}
       return '<tr><td class="num">'+fdate(m.fecha)+'</td><td>'+esc(m.cliente)+'</td><td>'+(m.concepto?'<span class="tag">'+esc(m.concepto)+'</span>':'—')+'</td><td class="muted">'+esc(m.recibo||'—')+'</td><td class="amt num">'+fmt(m.monto, monOf(m))+'</td>'+act+'</tr>';
     }).join('');
   }
+  // Un pase recibido se muestra como un grupo: la fila del pase (lo contado) y debajo cada venta que trajo.
+  function filasPaseRecibido(m, editable){
+    const src = S.cajas[m.srcUid]; const p = src && src.pases.find(x => x.numero===m.srcNumero); const k = monOf(m);
+    const ventas = p ? (p.movimientos||[]).filter(v => monOf(v)===k && v.tipo!=='pase').sort((a,b) => (a.fecha||'').localeCompare(b.fecha||'')) : [];
+    const abierto = !(S.pasesCerrados && S.pasesCerrados.has(m.id));
+    const quien = p ? (p.entrega || p.nombre || (src.perfil && src.perfil.responsable) || '') : '';
+    const solo = editable ? '<button type="button" class="small" data-act="solo" data-id="'+esc(m.id)+'">Entregar solo este</button>' : '';
+    const tog = ventas.length ? '<button type="button" class="link small pase-tog" data-pase-tog="'+esc(m.id)+'" aria-expanded="'+abierto+'">'+(abierto ? '▾ Ocultar ' : '▸ Ver ')+ventas.length+(ventas.length===1?' venta':' ventas')+'</button>' : '';
+    let h = '<tr class="pase-h"><td class="num">'+fdate(m.fecha)+'</td><td><b>Pase de '+esc(p ? CAJAS[p.origen] : 'otra caja')+'</b>'+(quien ? '<span class="sub">Entregó '+esc(quien)+' · recibido el '+fdate(m.fecha)+'</span>' : '')+tog+'</td><td><span class="tag">Pase recibido</span></td><td class="muted">'+esc(m.recibo||'—')+'</td><td class="amt num"><b>'+fmt(m.monto, k)+'</b></td>'+
+      (editable ? '<td class="amt"><div class="rowact">'+solo+'</div></td>' : '')+'</tr>';
+    if(abierto){
+      h += ventas.map(v => '<tr class="pase-d"><td class="num">'+fdate(v.fecha)+'</td><td>'+esc(v.cliente)+'</td><td>'+(v.concepto?'<span class="tag">'+esc(v.concepto)+'</span>':'—')+'</td><td class="muted">'+esc(v.recibo||'—')+'</td><td class="amt num">'+fmt(v.monto, k)+'</td>'+(editable?'<td></td>':'')+'</tr>').join('');
+      const dif = p && p.conDiferencia ? ((p.diferencia||{})[k]||0) : 0;
+      if(dif) h += '<tr class="pase-d dif"><td></td><td colspan="3">'+(dif<0 ? 'Faltante en el conteo' : 'Sobrante en el conteo')+' <span class="muted">· por eso el pase suma lo contado</span></td><td class="amt num">'+(dif<0?'−':'+')+fmt(Math.abs(dif), k)+'</td>'+(editable?'<td></td>':'')+'</tr>';
+    }
+    return h;
+  }
+  document.addEventListener('click', ev => { const b = ev.target.closest('[data-pase-tog]'); if(!b) return; S.pasesCerrados = S.pasesCerrados || new Set(); const id = b.dataset.paseTog; if(S.pasesCerrados.has(id)) S.pasesCerrados.delete(id); else S.pasesCerrados.add(id); render(); });
   function footMov(e, editable){
     const items = enCaja(e); if(!items.length) return '';
     const t = tot(items); const pal = esTesoreriaPropia(e) ? ['movimiento','movimientos'] : ['venta','ventas'];
