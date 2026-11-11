@@ -203,6 +203,10 @@ table.mini td{padding:5px 8px;background:var(--surface)!important}
 .llevar-row .cli small{color:var(--muted);margin-left:6px}
 .llevar-row .m{white-space:nowrap;text-align:right}
 .llevar-row.pase .cli{font-style:italic}
+table.mini tr.det-pase td{font-weight:600}
+table.mini tr.det-v td{font-size:12px;color:var(--muted);padding-top:3px;padding-bottom:3px}
+table.mini tr.det-v td:nth-child(2){padding-left:22px}
+table.mini tr.det-v.dif td{color:var(--danger)}
 .llevar .vacio{padding:10px;color:var(--muted);font-size:13px}
 .llevar-g{padding:6px 10px;font-size:12px;font-weight:600;color:var(--muted);background:var(--surface);display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line)}
 .llevar-list > .llevar-g:first-child{border-top:0}
@@ -615,7 +619,7 @@ details.st-tabla .tablewrap{margin-top:10px}
 
       <button type="button" class="link gate-out" id="btn-salir-gate" hidden>Cerrar sesión</button>
       <div class="gate-foot"><span>Tesorería Liniers · Onboarding · Retención</span><span>Spazios</span></div>
-      <div class="version">Versión 2026-11-11 · detalle de pases en caja</div>
+      <div class="version">Versión 2026-11-11 c · PDF con detalle</div>
       <div class="tema-fila" style="max-width:260px"><span class="tema-lbl">Apariencia<small data-tema-txt></small></span><div class="tema ico-tema" role="group" aria-label="Apariencia" data-tema-grupo>
         <button type="button" data-tema="light" aria-label="Claro" title="Claro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><button type="button" data-tema="dark" aria-label="Oscuro" title="Oscuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button><button type="button" data-tema="auto" aria-label="Automático" title="Automático (según el equipo)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button></div>
       </div>
@@ -639,7 +643,7 @@ details.st-tabla .tablewrap{margin-top:10px}
         <button type="button" data-tema="light" aria-label="Claro" title="Claro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><button type="button" data-tema="dark" aria-label="Oscuro" title="Oscuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button><button type="button" data-tema="auto" aria-label="Automático" title="Automático (según el equipo)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
       </div></div>
       <div class="status" id="status"><span class="dot"></span><span>Conectando…</span></div>
-      <div class="version">Versión 2026-11-11 · detalle de pases en caja</div>
+      <div class="version">Versión 2026-11-11 c · PDF con detalle</div>
     </div>
   </aside>
   <div class="scrim" id="scrim" hidden></div>
@@ -1035,7 +1039,7 @@ details.st-tabla .tablewrap{margin-top:10px}
     }
   }
   function drawDetalle(doc, p){
-    const L=16, R=194; const cols=[L, L+24, L+82, L+138, R];
+    const L=16, R=194; const cols=[L, L+24, L+82, L+128, R];
     let y;
     function head(cont){
       doc.addPage(); y = 18;
@@ -1053,10 +1057,22 @@ details.st-tabla .tablewrap{margin-top:10px}
     const fit = (t, w) => doc.splitTextToSize(String(t||'—'), w)[0];
     p.movimientos.slice().sort((a,b)=> monOf(a).localeCompare(monOf(b)) || (a.fecha||'').localeCompare(b.fecha||'')).forEach(m => {
       if(y > 278) head(true);
-      doc.text(fdate(m.fecha), cols[0]+1, y); doc.text(fit(m.cliente, 55), cols[1], y); doc.text(fit(m.concepto, 53), cols[2], y);
-      doc.text(fit(m.recibo, 26), cols[3], y); doc.text(fmt(m.monto, monOf(m)), R-1, y, {align:'right'});
+      doc.text(fdate(m.fecha), cols[0]+1, y); doc.text(fit(m.cliente, 55), cols[1], y); doc.text(fit(m.concepto, 44), cols[2], y);
+      if(String(m.recibo||'').length > 10){ doc.setFontSize(7); doc.text(String(m.recibo), cols[3], y); doc.setFontSize(9); } else doc.text(fit(m.recibo, 26), cols[3], y);
+      doc.text(fmt(m.monto, monOf(m)), R-1, y, {align:'right'});
       doc.setDrawColor(215); doc.setLineWidth(0.15); doc.line(L, y+2.2, R, y+2.2);
       y += 6.5;
+      if(m.tipo==='pase'){
+        // ventas que trajo ese pase, más chicas y con sangría
+        const d = ventasDeItem(m); const k = monOf(m);
+        doc.setFontSize(8); doc.setTextColor(95);
+        d.ventas.forEach(v => { if(y > 278){ head(true); doc.setFontSize(8); doc.setTextColor(95); }
+          doc.text(fdate(v.fecha), cols[0]+5, y); doc.text(fit(v.cliente, 51), cols[1]+4, y); doc.text(fit(v.concepto, 44), cols[2], y); doc.text(fit(v.recibo, 26), cols[3], y); doc.text(fmt(v.monto, k), R-1, y, {align:'right'});
+          y += 5; });
+        if(d.dif){ if(y > 278){ head(true); doc.setFontSize(8); } doc.setTextColor(150,30,30); doc.text((d.dif<0?'Faltante':'Sobrante') + ' en el conteo del pase', cols[1]+4, y); doc.text((d.dif<0?'-':'+') + fmt(Math.abs(d.dif), k), R-1, y, {align:'right'}); y += 5; }
+        if(d.ventas.length || d.dif){ doc.setDrawColor(215); doc.line(L, y-2.8, R, y-2.8); y += 1.5; }
+        doc.setFontSize(9); doc.setTextColor(20);
+      }
     });
     const mons = MONS.filter(k => (p.totales||{})[k] > 0);
     if(y > 278 - 6*mons.length) head(true);
@@ -1067,6 +1083,30 @@ details.st-tabla .tablewrap{margin-top:10px}
       doc.text('Total ' + MON[k].nombre.toLowerCase() + ' (' + c + (p.destino==='principal' ? (c===1?' movimiento':' movimientos') : (c===1?' venta':' ventas')) + ')', L+1, y+3); doc.text(fmt(p.totales[k], k), R-1, y+3, {align:'right'});
       y += 6.5;
     });
+    // Resumen para contabilizar: todas las ventas (propias y las de cada pase) por concepto,
+    // más las diferencias de conteo, cuadra con el total.
+    const ventas = []; let difs = {};
+    p.movimientos.forEach(m => { const k = monOf(m);
+      if(m.tipo==='pase'){ const d = ventasDeItem(m); d.ventas.forEach(v => ventas.push(Object.assign({}, v, {moneda:k}))); if(d.dif) difs[k] = (difs[k]||0) + d.dif;
+        if(!d.ventas.length) ventas.push({concepto:'Pase sin detalle', moneda:k, monto:m.monto - (d.dif||0)}); }
+      else ventas.push(Object.assign({}, m, {moneda:k})); });
+    if(!p.movimientos.some(m => m.tipo==='pase')) return;
+    const filas = []; mons.forEach(k => {
+      const porCon = {}; ventas.filter(v => v.moneda===k).forEach(v => { const c = v.concepto || 'Sin concepto'; const x = (porCon[c] = porCon[c] || {n:0, t:0}); x.n++; x.t += Number(v.monto)||0; });
+      Object.keys(porCon).sort().forEach(c => filas.push([k, c + ' (' + porCon[c].n + (porCon[c].n===1?' venta':' ventas') + ')', fmt(porCon[c].t, k), false]));
+      if(difs[k]) filas.push([k, 'Diferencias en el conteo de los pases', (difs[k]<0?'-':'+') + fmt(Math.abs(difs[k]), k), 'dif']);
+      filas.push([k, 'Total ' + MON[k].nombre.toLowerCase() + ' entregado', fmt(p.totales[k], k), 'tot']);
+    });
+    if(y > 270 - 5.5*filas.length) head(true); else y += 6;
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(20);
+    doc.text('Resumen por concepto (incluye las ventas de cada pase)', L+1, y); y += 6;
+    doc.setFontSize(9);
+    filas.forEach(([k, t, v, tipo]) => {
+      if(tipo==='tot'){ doc.setDrawColor(30); doc.setLineWidth(0.3); doc.line(L+100, y-3.6, R, y-3.6); doc.setFont('helvetica','bold'); doc.setTextColor(20); }
+      else { doc.setFont('helvetica','normal'); if(tipo==='dif') doc.setTextColor(150,30,30); else doc.setTextColor(40); }
+      doc.text(t, L+100, y); doc.text(v, R-1, y, {align:'right'}); y += tipo==='tot' ? 8 : 5.5;
+    });
+    doc.setTextColor(20); doc.setFont('helvetica','normal');
   }
   async function descargar(p, msgEl){
     if(!window.jspdf){ msg(msgEl,'err','No se pudo cargar el generador de PDF. Recargar la página e intentar de nuevo.'); return; }
@@ -1256,7 +1296,7 @@ details.st-tabla .tablewrap{margin-top:10px}
     const fechas = sel.map(m=>m.fecha).sort();
     const p = {numero:genNumero(), fecha:todayISO(), corte, desde:fechas[0], modo, origen:perfil.caja, destino, sucursal:perfil.sucursal, totales, queda,
       nombre, entrega:perfil.responsable, recibe, concepto:$('x-obs').value.trim(), desglose:des, estado:'pendiente', createdAt:new Date().toISOString(), origenUid:S.uid,
-      movimientos: sel.map(m => Object.assign({id:m.id, fecha:m.fecha, cliente:m.cliente, concepto:m.concepto||'', recibo:m.recibo||'', moneda:monOf(m), monto:m.monto}, m.tipo==='pase' ? {tipo:'pase', srcUid:m.srcUid, srcNumero:m.srcNumero} : {}))};
+      movimientos: sel.map(m => Object.assign({id:m.id, fecha:m.fecha, cliente:m.cliente, concepto:m.concepto||'', recibo:m.recibo||'', moneda:monOf(m), monto:m.monto}, m.tipo==='pase' ? Object.assign({tipo:'pase', srcUid:m.srcUid, srcNumero:m.srcNumero}, detalleParaEntrega(m)) : {}))};
     $('btn-pase').disabled = true;
     try{
       const data = Object.assign({}, p); delete data.estado;
@@ -1411,11 +1451,30 @@ details.st-tabla .tablewrap{margin-top:10px}
       '<td class="amt">'+totHTML(p.totales||{})+'</td><td>'+estado+'</td><td><div class="rowact">'+acts+'</div></td></tr>'+
       (abierto ? detallePase(p) : '');
   }
+  // Ventas que trajo un pase recibido, para guardarlas dentro de la entrega a Caseros
+  // (Tesorería Caseros no puede leer los pases de Onboarding y Retención).
+  function detalleParaEntrega(m){
+    const src = S.cajas[m.srcUid]; const p = src && src.pases.find(x => x.numero===m.srcNumero); const k = monOf(m);
+    if(!p) return {};
+    const ventas = (p.movimientos||[]).filter(v => monOf(v)===k && v.tipo!=='pase').map(v => ({fecha:v.fecha, cliente:v.cliente, concepto:v.concepto||'', recibo:v.recibo||'', monto:v.monto}));
+    return {deCaja:p.origen, entrego:p.entrega||p.nombre||'', ventas, dif: p.conDiferencia ? ((p.diferencia||{})[k]||0) : 0};
+  }
+  // Para mostrar el detalle: lo guardado en la entrega o, si es una entrega vieja, el pase original (solo Tesorería Liniers lo puede leer).
+  function ventasDeItem(m){
+    if(m.ventas) return {ventas:m.ventas, dif:m.dif||0};
+    const d = m.tipo==='pase' && m.srcUid ? detalleParaEntrega(m) : {};
+    return {ventas:d.ventas||[], dif:d.dif||0};
+  }
   function detallePase(p){
     const movs = (p.movimientos||[]).slice().sort((a,b) => monOf(a).localeCompare(monOf(b)) || (a.fecha||'').localeCompare(b.fecha||''));
     const t = p.totales||{};
     return '<tr class="det"><td colspan="7"><div class="det-h">Qué se pasó en '+esc(p.numero)+'</div><div class="tablewrap" style="border:0"><table class="mini"><thead><tr><th>Fecha</th><th>Cliente</th><th>Concepto</th><th>Recibo</th><th class="amt">Monto</th></tr></thead><tbody>'+
-      movs.map(m => '<tr><td>'+fdate(m.fecha)+'</td><td>'+esc(m.cliente)+'</td><td>'+esc(m.concepto||'—')+'</td><td>'+esc(m.recibo||'—')+'</td><td class="amt">'+fmt(m.monto, monOf(m))+'</td></tr>').join('')+
+      movs.map(m => { const k = monOf(m);
+        let h = '<tr'+(m.tipo==='pase'?' class="det-pase"':'')+'><td>'+fdate(m.fecha)+'</td><td>'+esc(m.cliente)+'</td><td>'+esc(m.concepto||'—')+'</td><td>'+esc(m.recibo||'—')+'</td><td class="amt">'+fmt(m.monto, k)+'</td></tr>';
+        if(m.tipo==='pase'){ const d = ventasDeItem(m);
+          h += d.ventas.map(v => '<tr class="det-v"><td>'+fdate(v.fecha)+'</td><td>'+esc(v.cliente)+'</td><td>'+esc(v.concepto||'—')+'</td><td>'+esc(v.recibo||'—')+'</td><td class="amt">'+fmt(v.monto, k)+'</td></tr>').join('');
+          if(d.dif) h += '<tr class="det-v dif"><td></td><td colspan="3">'+(d.dif<0?'Faltante':'Sobrante')+' en el conteo del pase</td><td class="amt">'+(d.dif<0?'−':'+')+fmt(Math.abs(d.dif), k)+'</td></tr>'; }
+        return h; }).join('')+
       '</tbody><tfoot>'+MONS.filter(k => t[k]>0).map(k => '<tr><td colspan="4">Total '+MON[k].nombre.toLowerCase()+'</td><td class="amt">'+fmt(t[k],k)+'</td></tr>').join('')+'</tfoot></table></div></td></tr>';
   }
   const isoLocal = ts => { const d = new Date(ts||Date.now()); return new Date(d - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
@@ -1427,7 +1486,7 @@ details.st-tabla .tablewrap{margin-top:10px}
       MONS.forEach(k => {
         const monto = (p.contado || p.totales || {})[k] || 0;
         if(!((p.totales||{})[k] > 0) || monto <= 0 || (p.entregado||{})[k]) return;
-        out.push({id:'pase:'+c.uid+':'+p.numero+':'+k, tipo:'pase', srcUid:c.uid, srcNumero:p.numero, fecha:isoLocal(p.recibidoAt), cliente:'Pase de Caja '+CAJAS[p.origen]+' · '+(p.entrega||''), concepto:'Pase recibido', recibo:p.numero, moneda:k, monto, createdAt:p.recibidoAt||''});
+        out.push({id:'pase:'+c.uid+':'+p.numero+':'+k, tipo:'pase', srcUid:c.uid, srcNumero:p.numero, fecha:isoLocal(p.recibidoAt), cliente:'Pase de '+CAJAS[p.origen]+' · '+(p.entrega||''), concepto:'Pase recibido', recibo:p.numero, moneda:k, monto, createdAt:p.recibidoAt||''});
       });
     }); });
     return out;
