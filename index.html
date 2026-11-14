@@ -356,7 +356,7 @@ body{line-height:1.5}
 .nav-item:active{background:var(--hover)}
 .nav-item[aria-current="page"]{background:var(--sel);color:var(--accent);font-weight:600}
 .nav-item .ico{flex:none;display:grid;place-items:center;color:currentColor;opacity:.9}
-.nav-txt small{font-weight:400}
+.nav-txt small{font-weight:400;white-space:normal;overflow:visible;line-height:1.35}
 .nav-item[aria-current="page"] .nav-txt small{color:var(--muted)}
 .nav-badge{border-radius:999px;padding:0 7px;line-height:20px;font-size:12px}
 .nav-dot{border:0;border-radius:999px;padding:0 7px;line-height:20px;font-size:12px}
@@ -715,7 +715,7 @@ details.st-tabla .tablewrap{margin-top:10px}
 
       <button type="button" class="link gate-out" id="btn-salir-gate" hidden>Cerrar sesión</button>
       <div class="gate-foot"><span>Tesorería Liniers · Onboarding · Retención · Gerente Suc</span><span>Spazios</span></div>
-      <div class="version">Versión 2026-11-13 b · celular</div>
+      <div class="version">Versión 2026-11-14 b · pagos</div>
       <div class="tema-fila" style="max-width:260px"><span class="tema-lbl">Apariencia<small data-tema-txt></small></span><div class="tema ico-tema" role="group" aria-label="Apariencia" data-tema-grupo>
         <button type="button" data-tema="light" aria-label="Claro" title="Claro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><button type="button" data-tema="dark" aria-label="Oscuro" title="Oscuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button><button type="button" data-tema="auto" aria-label="Automático" title="Automático (según el equipo)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button></div>
       </div>
@@ -739,7 +739,7 @@ details.st-tabla .tablewrap{margin-top:10px}
         <button type="button" data-tema="light" aria-label="Claro" title="Claro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><button type="button" data-tema="dark" aria-label="Oscuro" title="Oscuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button><button type="button" data-tema="auto" aria-label="Automático" title="Automático (según el equipo)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
       </div></div>
       <div class="status" id="status"><span class="dot"></span><span>Conectando…</span></div>
-      <div class="version">Versión 2026-11-13 b · celular</div>
+      <div class="version">Versión 2026-11-14 b · pagos</div>
     </div>
   </aside>
   <div class="scrim" id="scrim" hidden></div>
@@ -788,7 +788,7 @@ details.st-tabla .tablewrap{margin-top:10px}
 
         <div class="grid2">
           <section class="panel" aria-labelledby="t-venta">
-            <div class="panel-h"><span class="paso" aria-hidden="true">1</span><h2 id="t-venta">Cargar venta</h2><span class="eyebrow">Efectivo que entra a la caja</span></div>
+            <div class="panel-h"><span class="paso" aria-hidden="true">1</span><h2 id="t-venta">Cargar pago</h2><span class="eyebrow">Efectivo que entra a la caja</span></div>
             <form id="form-venta" novalidate>
               <div class="fields">
                 <div class="field"><label for="v-fecha">Fecha</label><input type="date" id="v-fecha"></div>
@@ -798,7 +798,7 @@ details.st-tabla .tablewrap{margin-top:10px}
                 <div class="field full"><label for="v-recibo">N° de recibo <span class="muted" style="font-weight:400">(opcional)</span></label><input type="text" id="v-recibo" placeholder="Ej.: R-1048"></div>
               </div>
               <div id="venta-msg" hidden></div>
-              <div class="actions"><button type="submit" class="primary">Cargar venta</button></div>
+              <div class="actions"><button type="submit" class="primary">Cargar pago</button></div>
             </form>
           </section>
 
@@ -808,7 +808,7 @@ details.st-tabla .tablewrap{margin-top:10px}
               <div class="fields">
                 <div class="field full"><span class="lbl" id="x-modo-lbl">Qué se pasa</span><div class="checks opts" role="radiogroup" aria-labelledby="x-modo-lbl"><label for="x-modo-todo"><input type="radio" name="x-modo" id="x-modo-todo" value="todo" checked><span> Todo lo cargado hasta un día<small>Lo más común al cerrar el día.</small></span></label><label for="x-modo-elegir"><input type="radio" name="x-modo" id="x-modo-elegir" value="elegir"><span> Solo los pagos que elija<small>Para pasar una parte del efectivo.</small></span></label></div></div>
                 <div class="field full" id="x-lista-f" hidden><span class="lbl">Pagos a pasar</span><div class="elegir" id="x-lista"></div></div>
-                <div class="field" id="x-corte-f"><label for="x-corte">Pasar las ventas hasta el día</label><input type="date" id="x-corte"></div>
+                <div class="field" id="x-corte-f"><label for="x-corte">Pasar los pagos hasta el día</label><input type="date" id="x-corte"></div>
                 <div class="field"><label for="x-destino">Caja que recibe</label><select id="x-destino"></select></div>
                 <div class="field full" id="x-mon-f"><span class="lbl">Monedas a pasar</span><div class="checks"><label for="x-ars"><input type="checkbox" id="x-ars" checked> Pesos</label><label for="x-usd"><input type="checkbox" id="x-usd" checked> Dólares</label></div></div>
                 <div class="sumline full" id="x-sum"></div>
@@ -830,7 +830,7 @@ details.st-tabla .tablewrap{margin-top:10px}
         </div>
 
         <section class="panel" aria-labelledby="t-mov">
-          <div class="panel-h"><h2 id="t-mov">Ventas en caja</h2><span class="eyebrow">Todavía no pasadas</span></div>
+          <div class="panel-h"><h2 id="t-mov">Pagos en caja</h2><span class="eyebrow">Todavía no pasados</span></div>
           <div class="tablewrap"><table class="mid"><thead><tr><th>Fecha</th><th>Cliente</th><th>Concepto</th><th>Recibo</th><th class="amt">Monto</th><th class="amt"></th></tr></thead><tbody id="mi-mov"></tbody><tfoot id="mi-mov-f"></tfoot></table></div>
           <details class="anuladas" id="mi-anul-w" hidden><summary id="mi-anul-s"></summary><div class="tablewrap"><table class="mid"><thead><tr><th>Fecha</th><th>Cliente</th><th>Concepto</th><th>Recibo</th><th class="amt">Monto</th><th>Motivo</th></tr></thead><tbody id="mi-anul"></tbody></table></div></details>
         </section>
@@ -911,7 +911,7 @@ details.st-tabla .tablewrap{margin-top:10px}
         <section class="panel" id="st-cp-p" aria-labelledby="st-cp-t"><div class="panel-h"><h2 id="st-cp-t">Carpetas</h2><span class="eyebrow">Por fecha de venta finalizada</span></div>
           <p class="note">La fecha de la carpeta es cuando la venta quedó finalizada con toda la documentación, no cuando entró la plata (a veces pagan y firman después, o falta documentación). Por eso estos números se miran aparte y no se suman a los cobros.</p>
           <div class="st-minis" id="st-cp"></div><div id="st-cp-mot"></div></section>
-        <p class="note">Los cobros se cuentan por la fecha cargada en cada venta, en efectivo. No incluyen las ventas anuladas. Si el período está en curso, se compara con el anterior hasta el mismo día.</p>
+        <p class="note">Los cobros se cuentan por la fecha cargada en cada pago, en efectivo. No incluyen los pagos anulados. Si el período está en curso, se compara con el anterior hasta el mismo día.</p>
       </div>
       <div class="st-tip" id="st-tip" role="tooltip" hidden></div>
 
@@ -922,7 +922,7 @@ details.st-tabla .tablewrap{margin-top:10px}
           <div><div class="eyebrow" id="o-caja-l"></div><div class="bigs" id="o-saldo"></div><div class="muted" id="o-saldo-d" style="font-size:13px;margin-top:6px"></div></div>
           <div class="who"><strong id="o-resp"></strong><span class="muted" id="o-suc" style="font-size:13px"></span></div>
         </section>
-        <section class="panel"><div class="panel-h"><h2>Ventas en caja</h2><span class="eyebrow">Carga el responsable de la caja</span></div>
+        <section class="panel"><div class="panel-h"><h2>Pagos en caja</h2><span class="eyebrow">Carga el responsable de la caja</span></div>
           <div class="tablewrap"><table class="mid"><thead><tr><th>Fecha</th><th>Cliente</th><th>Concepto</th><th>Recibo</th><th class="amt">Monto</th></tr></thead><tbody id="o-mov"></tbody><tfoot id="o-mov-f"></tfoot></table></div>
           <details class="anuladas" id="o-anul-w" hidden><summary id="o-anul-s"></summary><div class="tablewrap"><table class="mid"><thead><tr><th>Fecha</th><th>Cliente</th><th>Concepto</th><th>Recibo</th><th class="amt">Monto</th><th>Motivo</th></tr></thead><tbody id="o-anul"></tbody></table></div></details>
         </section>
@@ -1087,9 +1087,9 @@ details.st-tabla .tablewrap{margin-top:10px}
     y += 13;
     const n = (p.movimientos||[]).length;
     const ent = p.destino==='principal';
-    const palabra = ent ? (n===1?' movimiento':' movimientos') : (n===1?' venta':' ventas');
+    const palabra = ent ? (n===1?' movimiento':' movimientos') : (n===1?' pago':' pagos');
     if(p.modo==='elegir') lv(ent ? 'Movimientos elegidos' : 'Pagos elegidos', n + palabra + (p.desde && p.desde!==p.corte ? ' (' + fdate(p.desde) + ' al ' + fdate(p.corte) + ')' : ' (' + fdate(p.corte) + ')'), L, y);
-    else lv((ent?'Movimientos hasta el ':'Ventas hasta el ') + fdate(p.corte), n + palabra + (p.desde ? ' (desde ' + fdate(p.desde) + ')' : ''), L, y);
+    else lv((ent?'Movimientos hasta el ':'Pagos hasta el ') + fdate(p.corte), n + palabra + (p.desde ? ' (desde ' + fdate(p.desde) + ')' : ''), L, y);
     lv('Queda en caja que entrega', fmtTot(p.queda||{}, ' / '), L+62, y);
     lv('A nombre de', p.nombre, L+124, y, 54);
     y += 12;
@@ -1140,9 +1140,9 @@ details.st-tabla .tablewrap{margin-top:10px}
     function head(cont){
       doc.addPage(); y = 18;
       doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(20);
-      doc.text((p.destino==='principal' ? 'Detalle de la entrega N° ' : 'Detalle de ventas del pase N° ') + p.numero + (cont ? ' (continuación)' : ''), L, y);
+      doc.text((p.destino==='principal' ? 'Detalle de la entrega N° ' : 'Detalle de pagos del pase N° ') + p.numero + (cont ? ' (continuación)' : ''), L, y);
       doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(90);
-      doc.text('Caja ' + CAJAS[p.origen] + ' a Caja ' + CAJAS[p.destino] + ' · Ventas hasta el ' + fdate(p.corte), L, y+5);
+      doc.text('Caja ' + CAJAS[p.origen] + ' a Caja ' + CAJAS[p.destino] + ' · Pagos hasta el ' + fdate(p.corte), L, y+5);
       y += 12;
       doc.setFillColor(239,243,241); doc.rect(L, y-4.5, R-L, 7, 'F');
       doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(60);
@@ -1176,7 +1176,7 @@ details.st-tabla .tablewrap{margin-top:10px}
     doc.setFont('helvetica','bold'); doc.setFontSize(10);
     mons.forEach(k => {
       const c = p.movimientos.filter(m => monOf(m)===k).length;
-      doc.text('Total ' + MON[k].nombre.toLowerCase() + ' (' + c + (p.destino==='principal' ? (c===1?' movimiento':' movimientos') : (c===1?' venta':' ventas')) + ')', L+1, y+3); doc.text(fmt(p.totales[k], k), R-1, y+3, {align:'right'});
+      doc.text('Total ' + MON[k].nombre.toLowerCase() + ' (' + c + (p.destino==='principal' ? (c===1?' movimiento':' movimientos') : (c===1?' pago':' pagos')) + ')', L+1, y+3); doc.text(fmt(p.totales[k], k), R-1, y+3, {align:'right'});
       y += 6.5;
     });
     // Resumen para contabilizar: todas las ventas (propias y las de cada pase) por concepto,
@@ -1189,13 +1189,13 @@ details.st-tabla .tablewrap{margin-top:10px}
     if(!p.movimientos.some(m => m.tipo==='pase')) return;
     const filas = []; mons.forEach(k => {
       const porCon = {}; ventas.filter(v => v.moneda===k).forEach(v => { const c = v.concepto || 'Sin concepto'; const x = (porCon[c] = porCon[c] || {n:0, t:0}); x.n++; x.t += Number(v.monto)||0; });
-      Object.keys(porCon).sort().forEach(c => filas.push([k, c + ' (' + porCon[c].n + (porCon[c].n===1?' venta':' ventas') + ')', fmt(porCon[c].t, k), false]));
+      Object.keys(porCon).sort().forEach(c => filas.push([k, c + ' (' + porCon[c].n + (porCon[c].n===1?' pago':' pagos') + ')', fmt(porCon[c].t, k), false]));
       if(difs[k]) filas.push([k, 'Diferencias en el conteo de los pases', (difs[k]<0?'-':'+') + fmt(Math.abs(difs[k]), k), 'dif']);
       filas.push([k, 'Total ' + MON[k].nombre.toLowerCase() + ' entregado', fmt(p.totales[k], k), 'tot']);
     });
     if(y > 270 - 5.5*filas.length) head(true); else y += 6;
     doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(20);
-    doc.text('Resumen por concepto (incluye las ventas de cada pase)', L+1, y); y += 6;
+    doc.text('Resumen por concepto (incluye los pagos de cada pase)', L+1, y); y += 6;
     doc.setFontSize(9);
     filas.forEach(([k, t, v, tipo]) => {
       if(tipo==='tot'){ doc.setDrawColor(30); doc.setLineWidth(0.3); doc.line(L+100, y-3.6, R, y-3.6); doc.setFont('helvetica','bold'); doc.setTextColor(20); }
@@ -1279,18 +1279,18 @@ details.st-tabla .tablewrap{margin-top:10px}
     if(m.recibo){
       const key = m.recibo.toUpperCase().replace(/\s+/g,'');
       const dup = reciboExistente(mia(), key);
-      if(dup && S.dupOk !== 'r|'+key){ S.dupOk = 'r|'+key; return msg($('venta-msg'),'info','El recibo '+m.recibo+' ya está cargado en esta caja ('+dup.cliente+', '+fdate(dup.fecha)+', '+fmt(dup.monto, monOf(dup))+'). Si es correcto, tocar «Cargar venta» otra vez para guardarla igual.'); }
+      if(dup && S.dupOk !== 'r|'+key){ S.dupOk = 'r|'+key; return msg($('venta-msg'),'info','El recibo '+m.recibo+' ya está cargado en esta caja ('+dup.cliente+', '+fdate(dup.fecha)+', '+fmt(dup.monto, monOf(dup))+'). Si es correcto, tocar «Cargar pago» otra vez para guardarlo igual.'); }
     }
     if(!m.recibo || S.dupOk !== 'r|'+m.recibo.toUpperCase().replace(/\s+/g,'')){
       const igual = ventaParecida(mia(), m);
       const clave = 'v|'+normCli(m.cliente)+'|'+m.moneda+'|'+m.monto+'|'+m.fecha;
       if(igual && S.dupOk !== clave){
         S.dupOk = clave;
-        return msg($('venta-msg'),'info','Ya hay una venta igual cargada: '+igual.cliente+', '+fmt(igual.monto, monOf(igual))+', '+(igual.concepto||'sin concepto')+', del '+fdate(igual.fecha)+(igual.recibo?' (recibo '+igual.recibo+')':'')+'. Si es otro pago, tocar «Cargar venta» otra vez para guardarla igual.');
+        return msg($('venta-msg'),'info','Ya hay un pago igual cargado: '+igual.cliente+', '+fmt(igual.monto, monOf(igual))+', '+(igual.concepto||'sin concepto')+', del '+fdate(igual.fecha)+(igual.recibo?' (recibo '+igual.recibo+')':'')+'. Si es otro pago, tocar «Cargar pago» otra vez para guardarlo igual.');
       }
     }
     S.dupOk = null;
-    try{ const {estado, ...dataMov} = m; chk(await sb.from('caja_movimientos').insert({owner:S.uid, estado:'en_caja', data:dataMov})); await cargar(); msg($('venta-msg'),'ok','Venta de '+m.cliente+' por '+fmt(m.monto, m.moneda)+' cargada.'); ['v-cliente','v-recibo','v-monto'].forEach(id => $(id).value=''); $('v-cliente').focus(); }
+    try{ const {estado, ...dataMov} = m; chk(await sb.from('caja_movimientos').insert({owner:S.uid, estado:'en_caja', data:dataMov})); await cargar(); msg($('venta-msg'),'ok','Pago de '+m.cliente+' por '+fmt(m.monto, m.moneda)+' cargado.'); ['v-cliente','v-recibo','v-monto'].forEach(id => $(id).value=''); $('v-cliente').focus(); }
     catch(e){ msg($('venta-msg'),'err',errTxt(e)); }
   });
 
@@ -1343,7 +1343,7 @@ details.st-tabla .tablewrap{margin-top:10px}
         const ventas = (src.movimientos||[]).filter(v => monOf(v)===m.moneda);
         const dif = ((src.diferencia||{})[m.moneda]) || 0;
         const key = m.srcNumero+'|'+m.moneda, open = S.prevOpen.has(key);
-        return '<details class="llevar-pase" data-prev="'+esc(key)+'"'+(open?' open':'')+'><summary><span>'+fdate(m.fecha)+'</span><span class="cli">'+esc(m.recibo)+'<small>Caja '+esc(CAJAS[src.origen]||'')+' · '+esc(src.entrega||'')+' · '+ventas.length+(ventas.length===1?' venta':' ventas')+'</small></span><span class="m">'+fmt(m.monto, m.moneda)+'</span></summary>'+
+        return '<details class="llevar-pase" data-prev="'+esc(key)+'"'+(open?' open':'')+'><summary><span>'+fdate(m.fecha)+'</span><span class="cli">'+esc(m.recibo)+'<small>Caja '+esc(CAJAS[src.origen]||'')+' · '+esc(src.entrega||'')+' · '+ventas.length+(ventas.length===1?' pago':' pagos')+'</small></span><span class="m">'+fmt(m.monto, m.moneda)+'</span></summary>'+
           ventas.map(v => '<div class="sub-row"><span>'+fdate(v.fecha)+'</span><span>'+esc(v.cliente)+(v.concepto?' · '+esc(v.concepto):'')+(v.recibo?' · '+esc(v.recibo):'')+'</span><span class="m">'+fmt(v.monto, monOf(v))+'</span></div>').join('')+
           (dif ? '<div class="nota">Al recibirlo se contó '+fmt(m.monto, m.moneda)+': '+(dif<0?'faltante ':'sobrante ')+fmt(Math.abs(dif), m.moneda)+' respecto de lo cargado.</div>' : '')+'</details>';
       };
@@ -1353,7 +1353,7 @@ details.st-tabla .tablewrap{margin-top:10px}
       else {
         h += '<div class="llevar-list">';
         if(pases.length) h += '<div class="llevar-g"><span>Pases recibidos ('+pases.length+')</span><span>'+subt(pases)+'</span></div>' + pases.map(paseRow).join('');
-        if(propias.length) h += '<div class="llevar-g"><span>Ventas de Tesorería Liniers ('+propias.length+')</span><span>'+subt(propias)+'</span></div>' + propias.map(row).join('');
+        if(propias.length) h += '<div class="llevar-g"><span>Pagos de Tesorería Liniers ('+propias.length+')</span><span>'+subt(propias)+'</span></div>' + propias.map(row).join('');
         h += '</div><div class="llevar-tot"><span>Total a entregar</span><span>'+subt(sel)+'</span></div>';
       }
       prev.innerHTML = h;
@@ -1362,10 +1362,10 @@ details.st-tabla .tablewrap{margin-top:10px}
       prev.innerHTML = '<div class="llevar-h"><span>Lo que se lleva este pase</span><span>'+(corte ? 'hasta el '+fdate(corte) : '')+'</span></div>'+
         (lista.length ? '<div class="llevar-list">'+lista.map(m => '<div class="llevar-row'+(m.tipo==='pase'?' pase':'')+'"><span>'+fdate(m.fecha)+'</span>'+
           '<span class="cli">'+esc(m.cliente)+'<small>'+esc([m.concepto, m.recibo].filter(Boolean).join(' · '))+'</small></span><span class="m">'+fmt(m.monto, monOf(m))+'</span></div>').join('')+'</div>'
-        : '<div class="vacio">'+(corte ? 'No hay ventas en caja hasta ese día en las monedas marcadas.' : 'Elegir hasta qué día se pasa.')+'</div>');
+        : '<div class="vacio">'+(corte ? 'No hay pagos en caja hasta ese día en las monedas marcadas.' : 'Elegir hasta qué día se pasa.')+'</div>');
     }
     const tes = S.perfil && S.perfil.caja==='tesoreria';
-    $('x-sum').innerHTML = '<span>'+(tes?'Se entregan':'Se pasan')+' <b>'+sel.length+'</b> '+(tes ? (sel.length===1?'movimiento':'movimientos') : (sel.length===1?'venta':'ventas'))+'</span><span class="tot">'+MONS.filter(k => totales[k]>0).map(k => '<b>'+fmt(totales[k],k)+'</b>').join('')+(sel.length?'':'<b>'+fmt(0,'ARS')+'</b>')+'</span>';
+    $('x-sum').innerHTML = '<span>'+(tes?'Se entregan':'Se pasan')+' <b>'+sel.length+'</b> '+(tes ? (sel.length===1?'movimiento':'movimientos') : (sel.length===1?'pago':'pagos'))+'</span><span class="tot">'+MONS.filter(k => totales[k]>0).map(k => '<b>'+fmt(totales[k],k)+'</b>').join('')+(sel.length?'':'<b>'+fmt(0,'ARS')+'</b>')+'</span>';
     const des = getDesglose();
     const lines = MONS.filter(k => desgTotal(des[k])>0 || totales[k]>0).map(k => {
       const t = desgTotal(des[k]); const dif = t>0 && Math.abs(t-totales[k])>0.009 ? ' · diferencia '+fmt(t-totales[k],k) : '';
@@ -1382,7 +1382,7 @@ details.st-tabla .tablewrap{margin-top:10px}
     if(modo==='elegir'){
       if(!sel.length) return msg($('pase-msg'),'err','Marcar al menos un pago de la lista para pasar.');
     } else {
-      if(!corte) return msg($('pase-msg'),'err','Falta el día hasta el que se pasan las ventas.');
+      if(!corte) return msg($('pase-msg'),'err','Falta el día hasta el que se pasan los pagos.');
       if(!mons.length) return msg($('pase-msg'),'err','Elegir al menos una moneda para pasar.');
       if(!sel.length) return msg($('pase-msg'),'err','No hay efectivo en caja hasta ese día en la moneda elegida.');
     }
@@ -1433,7 +1433,7 @@ details.st-tabla .tablewrap{margin-top:10px}
         const quien = (S.perfil && S.perfil.responsable) || '';
         // La base de datos devuelve las ventas a la caja de origen al marcar el pase como devuelto.
         chk(await sb.from('caja_pases').update({estado:'devuelto', recepcion:{devueltoAt:now, devueltoPor:S.uid, devueltoPorNombre:quien, motivoDev:motivo}}).eq('numero', numero));
-        msg(msgEl, 'ok', (p.destino==='principal' ? 'Entrega ' : 'Pase ') + numero + ' devuelto. ' + (p.destino==='principal' ? 'Tesorería Liniers' : 'La caja ' + CAJAS[p.origen]) + ' lo ve con el motivo y tiene las ventas de nuevo en su caja para corregir y volver a pasar.');
+        msg(msgEl, 'ok', (p.destino==='principal' ? 'Entrega ' : 'Pase ') + numero + ' devuelto. ' + (p.destino==='principal' ? 'Tesorería Liniers' : 'La caja ' + CAJAS[p.origen]) + ' lo ve con el motivo y tiene los pagos de nuevo en su caja para corregir y volver a pasar.');
       }
       else if(patch){
         const {estado, ...recepcion} = patch; chk(await sb.from('caja_pases').update({estado, recepcion}).eq('numero', numero));
@@ -1528,7 +1528,7 @@ details.st-tabla .tablewrap{margin-top:10px}
       else if(conf && S.conf.accion==='devolver'){
         acts += '<span class="confirmbox"><input type="text" id="motivo-input" class="motivo" placeholder="Qué está mal (ej.: faltan $5.000, recibo repetido)" value="'+esc(S.motivo||'')+'" aria-label="Motivo de la devolución"><button type="button" class="small primary" data-act="si" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Devolver</button><button type="button" class="small" data-act="no">Cancelar</button></span>';
       }
-      else if(conf) acts += confBox(uid, p.numero, '¿Anular? Las ventas vuelven a la caja.');
+      else if(conf) acts += confBox(uid, p.numero, '¿Anular? Los pagos vuelven a la caja.');
       else {
         const recibe = (S.isOwner && p.destino==='tesoreria') || (esCaseros() && p.destino==='principal');
         if(recibe) acts += '<button type="button" class="small" data-act="recibir" data-uid="'+esc(uid)+'" data-id="'+esc(p.numero)+'">Marcar recibido</button>'+
@@ -1541,7 +1541,7 @@ details.st-tabla .tablewrap{margin-top:10px}
       : p.estado==='anulado' ? '<span class="pill anulado">Anulado</span>' : '<span class="pill pendiente">Pendiente</span>';
     const n = (p.movimientos||[]).length;
     return '<tr class="'+esc(p.estado)+'"><td><span class="num">'+esc(p.numero)+'</span><span class="sub">'+fdate(p.fecha)+'</span></td>'+
-      '<td>'+esc(CAJAS[p.origen])+' → '+esc(CAJAS[p.destino])+'<span class="sub">'+n+(p.destino==='principal' ? (n===1?' movimiento':' movimientos') : (n===1?' venta':' ventas'))+(p.modo==='elegir' ? (p.destino==='principal' ? (n===1?' elegido':' elegidos') : (n===1?' elegida':' elegidas')) : ' hasta el '+fdate(p.corte))+'</span></td>'+
+      '<td>'+esc(CAJAS[p.origen])+' → '+esc(CAJAS[p.destino])+'<span class="sub">'+n+(p.destino==='principal' ? (n===1?' movimiento':' movimientos') : (n===1?' pago':' pagos'))+(p.modo==='elegir' ? (n===1?' elegido':' elegidos') : ' hasta el '+fdate(p.corte))+'</span></td>'+
       '<td>'+esc(p.nombre)+(p.concepto?'<span class="sub">'+esc(p.concepto)+'</span>':'')+'</td>'+
       '<td>'+esc(p.entrega)+'<span class="sub">recibe '+esc(p.recibe)+'</span></td>'+
       '<td class="amt">'+totHTML(p.totales||{})+'</td><td>'+estado+'</td><td><div class="rowact">'+acts+'</div></td></tr>'+
@@ -1591,7 +1591,7 @@ details.st-tabla .tablewrap{margin-top:10px}
   const emptyRow = (cols, t, d) => '<tr><td colspan="'+cols+'"><div class="empty"><strong>'+t+'</strong><span>'+d+'</span></div></td></tr>';
   function rowsMov(e, editable){
     const items = enCaja(e);
-    if(!items.length) return emptyRow(editable?6:5, 'No hay efectivo en caja', editable ? (esTesoreriaPropia(e) ? 'Las ventas que cargue y los pases que reciba aparecen acá hasta que los entregue a la Tesorería Caseros (Principal).' : 'Las ventas que se carguen aparecen acá hasta que se pasa la caja.') : 'El responsable todavía no cargó ventas, o ya pasó todo.');
+    if(!items.length) return emptyRow(editable?6:5, 'No hay efectivo en caja', editable ? (esTesoreriaPropia(e) ? 'Los pagos que cargue y los pases que reciba aparecen acá hasta que los entregue a la Tesorería Caseros (Principal).' : 'Los pagos que se carguen aparecen acá hasta que se pasa la caja.') : 'El responsable todavía no cargó pagos, o ya pasó todo.');
     return items.map(m => {
       if(m.tipo==='pase') return filasPaseRecibido(m, editable);
       let act = '';
@@ -1608,7 +1608,7 @@ details.st-tabla .tablewrap{margin-top:10px}
     const abierto = !(S.pasesCerrados && S.pasesCerrados.has(m.id));
     const quien = p ? (p.entrega || p.nombre || (src.perfil && src.perfil.responsable) || '') : '';
     const solo = editable ? '<button type="button" class="small" data-act="solo" data-id="'+esc(m.id)+'">Entregar solo este</button>' : '';
-    const tog = ventas.length ? '<button type="button" class="link small pase-tog" data-pase-tog="'+esc(m.id)+'" aria-expanded="'+abierto+'">'+(abierto ? '▾ Ocultar ' : '▸ Ver ')+ventas.length+(ventas.length===1?' venta':' ventas')+'</button>' : '';
+    const tog = ventas.length ? '<button type="button" class="link small pase-tog" data-pase-tog="'+esc(m.id)+'" aria-expanded="'+abierto+'">'+(abierto ? '▾ Ocultar ' : '▸ Ver ')+ventas.length+(ventas.length===1?' pago':' pagos')+'</button>' : '';
     let h = '<tr class="pase-h"><td class="num">'+fdate(m.fecha)+'</td><td><b>Pase de '+esc(p ? CAJAS[p.origen] : 'otra caja')+'</b>'+(quien ? '<span class="sub">Entregó '+esc(quien)+' · recibido el '+fdate(m.fecha)+'</span>' : '')+tog+'</td><td><span class="tag">Pase recibido</span></td><td class="muted">'+esc(m.recibo||'—')+'</td><td class="amt num"><b>'+fmt(m.monto, k)+'</b></td>'+
       (editable ? '<td class="amt"><div class="rowact">'+solo+'</div></td>' : '')+'</tr>';
     if(abierto){
@@ -1621,12 +1621,12 @@ details.st-tabla .tablewrap{margin-top:10px}
   document.addEventListener('click', ev => { const b = ev.target.closest('[data-pase-tog]'); if(!b) return; S.pasesCerrados = S.pasesCerrados || new Set(); const id = b.dataset.paseTog; if(S.pasesCerrados.has(id)) S.pasesCerrados.delete(id); else S.pasesCerrados.add(id); render(); });
   function footMov(e, editable){
     const items = enCaja(e); if(!items.length) return '';
-    const t = tot(items); const pal = esTesoreriaPropia(e) ? ['movimiento','movimientos'] : ['venta','ventas'];
+    const t = tot(items); const pal = esTesoreriaPropia(e) ? ['movimiento','movimientos'] : ['pago','pagos'];
     return MONS.filter(k => t[k]>0).map(k => { const c = items.filter(m => monOf(m)===k).length;
       return '<tr><td colspan="4">Total '+MON[k].nombre.toLowerCase()+' · '+c+' '+(c===1?pal[0]:pal[1])+'</td><td class="amt num">'+fmt(t[k],k)+'</td>'+(editable?'<td></td>':'')+'</tr>'; }).join('');
   }
   const saldoHTML = e => { const t = tot(enCaja(e)); return MONS.map(k => '<div class="big"><span class="cur">'+MON[k].nombre+'</span>'+fmt(t[k],k)+'</div>').join(''); };
-  function saldoDetalle(e){ const it = enCaja(e); const tes = esTesoreriaPropia(e); if(!it.length) return tes ? 'Sin efectivo pendiente de entregar' : 'Sin ventas pendientes de pasar'; const f = it.map(m=>m.fecha).sort(); return it.length+' '+(tes ? (it.length===1?'movimiento':'movimientos') : (it.length===1?'venta':'ventas'))+' desde el '+fdate(f[0]); }
+  function saldoDetalle(e){ const it = enCaja(e); const tes = esTesoreriaPropia(e); if(!it.length) return tes ? 'Sin efectivo pendiente de entregar' : 'Sin pagos pendientes de pasar'; const f = it.map(m=>m.fecha).sort(); return it.length+' '+(tes ? (it.length===1?'movimiento':'movimientos') : (it.length===1?'pago':'pagos'))+' desde el '+fdate(f[0]); }
 
   const LIMITE_ARS = 4000000;
   const superaLimite = e => tot(enCaja(e)).ARS >= LIMITE_ARS;
@@ -1648,7 +1648,7 @@ details.st-tabla .tablewrap{margin-top:10px}
   const btnVisto = n => ' <button type="button" class="small" data-aviso-ok="'+esc(n)+'">Entendido</button>';
   function setAlerta(id, e, propia){
     const el = $(id); const partes = [];
-    devueltosRecientes(e).forEach(p => partes.push([p.numero, (p.destino==='principal' ? 'Tesorería Caseros devolvió la entrega ' : 'Tesorería Liniers devolvió el pase ') + p.numero + ' (' + fmtTot(p.totales||{}) + ')' + (p.motivoDev ? ': «' + p.motivoDev + '»' : '') + '. ' + (propia ? 'Las ventas volvieron a su caja: corrija lo que haga falta y vuelva a pasarlas.' : 'Las ventas volvieron a esa caja.')]));
+    devueltosRecientes(e).forEach(p => partes.push([p.numero, (p.destino==='principal' ? 'Tesorería Caseros devolvió la entrega ' : 'Tesorería Liniers devolvió el pase ') + p.numero + ' (' + fmtTot(p.totales||{}) + ')' + (p.motivoDev ? ': «' + p.motivoDev + '»' : '') + '. ' + (propia ? 'Los pagos volvieron a su caja: corrija lo que haga falta y vuelva a pasarlos.' : 'Los pagos volvieron a esa caja.')]));
     if(e.perfil && superaLimite(e)) partes.push(['', (propia ? 'Su caja tiene ' : 'La caja '+CAJAS[e.perfil.caja]+' tiene ') + fmt(tot(enCaja(e)).ARS,'ARS') + ' en efectivo y superó el límite de ' + fmt(LIMITE_ARS,'ARS') + '. ' + (e.perfil.caja!=='tesoreria' ? 'Conviene hacer el pase a Tesorería Liniers.' : 'Conviene hacer la entrega a la Tesorería Caseros (Principal).')]);
     el.hidden = !partes.length; if(!partes.length) return;
     el.className = 'msg alerta';
@@ -1664,7 +1664,7 @@ details.st-tabla .tablewrap{margin-top:10px}
       const caja = e.perfil ? CAJAS[e.perfil.caja] + ' · ' + e.perfil.responsable : 'Tesorería Liniers';
       const ok = m => norm(m.cliente).includes(q) || norm(m.recibo).includes(q);
       e.mov.filter(ok).forEach(m => res.push({caja, m, estado:'<span class="pill pendiente">En caja</span>'}));
-      (e.anul||[]).filter(ok).forEach(m => res.push({caja, m, estado:'<span class="pill anulado">Anulada</span>'+(m.motivo?'<span class="sub">'+esc(m.motivo)+'</span>':'')}));
+      (e.anul||[]).filter(ok).forEach(m => res.push({caja, m, estado:'<span class="pill anulado">Anulado</span>'+(m.motivo?'<span class="sub">'+esc(m.motivo)+'</span>':'')}));
       e.pases.filter(paseVigente).forEach(p => (p.movimientos||[]).filter(ok).forEach(m => res.push({caja, m, uid:e.uid, pase:p,
         estado:'<span class="pill '+(p.estado==='recibido'?(p.conDiferencia?'diferencia':'recibido'):'pendiente')+'">'+(p.estado==='recibido'?'Pase recibido':'Pase pendiente')+'</span><span class="sub num">'+esc(p.numero)+'</span>'})));
     });
@@ -1675,7 +1675,7 @@ details.st-tabla .tablewrap{margin-top:10px}
     });
     res.sort((a,b) => (b.m.fecha||'').localeCompare(a.m.fecha||''));
     box.hidden = false;
-    if(!res.length){ box.innerHTML = '<div class="empty" style="padding:14px"><strong>Sin resultados</strong><span>No hay ventas con ese cliente o número de recibo'+(S.isOwner?' en ninguna caja.':' en su caja.')+'</span></div>'; return; }
+    if(!res.length){ box.innerHTML = '<div class="empty" style="padding:14px"><strong>Sin resultados</strong><span>No hay pagos con ese cliente o número de recibo'+(S.isOwner?' en ninguna caja.':' en su caja.')+'</span></div>'; return; }
     const shown = res.slice(0,50);
     box.innerHTML = '<div class="muted" style="font-size:13px;margin-bottom:8px">'+res.length+(res.length===1?' resultado':' resultados')+(res.length>50?' · se muestran los 50 más recientes':'')+'</div>'+
       '<div class="tablewrap"><table class="wide"><thead><tr>'+(S.isOwner?'<th>Caja</th>':'')+'<th>Fecha</th><th>Cliente</th><th>Concepto</th><th>Recibo</th><th class="amt">Monto</th><th>Estado</th><th class="amt"></th></tr></thead><tbody>'+
@@ -1685,7 +1685,7 @@ details.st-tabla .tablewrap{margin-top:10px}
   $('q').addEventListener('input', renderBusqueda);
   function renderAnul(pre, e){
     const w = $(pre+'-anul-w'); w.hidden = !e.anul.length; if(!e.anul.length) return;
-    $(pre+'-anul-s').textContent = 'Ventas anuladas ('+e.anul.length+')';
+    $(pre+'-anul-s').textContent = 'Pagos anulados ('+e.anul.length+')';
     $(pre+'-anul').innerHTML = e.anul.map(m => '<tr class="anulado"><td class="num">'+fdate(m.fecha)+'</td><td>'+esc(m.cliente)+'</td><td>'+esc(m.concepto||'—')+'</td><td>'+esc(m.recibo||'—')+'</td><td class="amt num">'+fmt(m.monto, monOf(m))+'</td><td style="color:var(--ink)">'+esc(m.motivo||'—')+(m.anuladaAt?'<span class="sub">Anulada el '+new Date(m.anuladaAt).toLocaleDateString('es-AR')+'</span>':'')+'</td></tr>').join('');
   }
   /* ---------- botones en lugar de listas (concepto y moneda) ---------- */
@@ -1722,7 +1722,7 @@ details.st-tabla .tablewrap{margin-top:10px}
     const pend = e.pases.filter(x => x.estado==='pendiente');
     const recib = e.pases.filter(x => x.estado==='recibido').sort((a,b) => String(b.recibidoAt||'').localeCompare(String(a.recibidoAt||'')));
     const desde = items.length ? fdate(items.map(m => m.fecha).sort()[0]).slice(0,5) : '';
-    const nV = items.length + ' ' + (tes ? (items.length===1?'movimiento':'movimientos') : (items.length===1?'venta':'ventas'));
+    const nV = items.length + ' ' + (tes ? (items.length===1?'movimiento':'movimientos') : (items.length===1?'pago':'pagos'));
     // barra del límite de efectivo
     const pct = Math.min(100, Math.round((t.ARS||0) / LIMITE_ARS * 100));
     $('mi-limite').innerHTML = '<div class="limite-bar" role="img" aria-label="'+pct+' % del límite"><span style="width:'+pct+'%"></span></div><small>'+pct+' % del límite de '+fmt(LIMITE_ARS,'ARS').replace(/,00$/,'')+'. '+(tes ? 'Al llegar al límite, haga la entrega a Caseros.' : 'Al llegar al límite, pase la caja.')+'</small>';
@@ -1734,7 +1734,7 @@ details.st-tabla .tablewrap{margin-top:10px}
     const paso = (n, on, tit, txt, em, cls) => '<div class="p'+(on?' on':'')+'"><span class="paso">'+n+'</span><div><b>'+tit+'</b><span>'+txt+'</span>'+(em?'<em class="'+(cls||'')+'">'+em+'</em>':'')+'</div></div>';
     const activo = items.length ? 1 : (pend.length ? 3 : 1);
     $('mi-guia-p').innerHTML =
-      paso(1, activo===1, 'Cargue cada cobro', 'Cada pago en efectivo que entra, con su recibo.', items.length ? nV+' sin pasar' : 'Sin ventas pendientes', items.length ? 'r' : '') +
+      paso(1, activo===1, 'Cargue cada pago', 'Cada pago en efectivo que entra, con su recibo.', items.length ? nV+' sin pasar' : 'Sin pagos pendientes', items.length ? 'r' : '') +
       paso(2, false, 'Pase la caja', 'Entregue el efectivo a Tesorería Liniers y descargue el comprobante.', pend.length ? (pend.length===1 ? '1 pase esperando conteo' : pend.length+' pases esperando conteo') : '', 'w') +
       paso(3, activo===3, 'Tesorería cuenta y acepta', 'Si el conteo no coincide, queda la diferencia o se lo devuelven para corregir.', recib.length ? 'Último aceptado: '+new Date(recib[0].recibidoAt||Date.now()).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}) : '', '');
   }
@@ -1747,9 +1747,9 @@ details.st-tabla .tablewrap{margin-top:10px}
     const tes = p.caja==='tesoreria';
     const opts = tes ? ['principal'] : ['tesoreria'];
     $('t-pase').textContent = tes ? 'Entregar a Tesorería Caseros' : 'Pasar caja';
-    document.querySelector('label[for="x-corte"]').textContent = tes ? 'Entregar lo que hay en caja hasta el día' : 'Pasar las ventas hasta el día';
+    document.querySelector('label[for="x-corte"]').textContent = tes ? 'Entregar lo que hay en caja hasta el día' : 'Pasar los pagos hasta el día';
     $('btn-pase').textContent = (tes ? 'Registrar entrega' : 'Pasar caja') + (S.dl ? ' y descargar comprobante' : '');
-    $('t-mov').textContent = tes ? 'Efectivo en caja' : 'Ventas en caja';
+    $('t-mov').textContent = tes ? 'Efectivo en caja' : 'Pagos en caja';
     $('x-modo-todo').nextSibling.firstChild.textContent = tes ? ' Todo lo que hay en caja hasta un día' : ' Todo lo cargado hasta un día';
     $('x-modo-elegir').nextSibling.firstChild.textContent = tes ? ' Solo los movimientos que elija' : ' Solo los pagos que elija';
     renderLista();
@@ -2099,7 +2099,8 @@ details.st-tabla .tablewrap{margin-top:10px}
   }
   function renderTabs(){
     const t = $('tabs'); const mi = mia();
-    const corto = e => fmt(tot(enCaja(e)).ARS,'ARS').replace(/,00$/,'');
+    // pesos y, si hay, dólares (para que no parezca que la caja solo tiene pesos)
+    const corto = e => { const t = tot(enCaja(e)); const nb = x => x.replace(/,00$/,'').replace(/ /g,'\u00a0'); return nb(fmt(t.ARS,'ARS')) + (t.USD ? ' · ' + nb(fmt(t.USD,'USD')) : ''); };
     const grupo = html => '<div class="nav-group">' + html + '</div>';
     if(esCaseros()){
       const n = Object.values(S.cajas).flatMap(e => e.pases).filter(p => p.destino==='principal' && p.estado==='pendiente').length;
@@ -2492,7 +2493,7 @@ details.st-tabla .tablewrap{margin-top:10px}
     else if(tab==='stats'){ titulo = 'Estadísticas'; sub = ''; }
     else if(tab==='carpetas'){ titulo = 'Carpetas'; sub = S.isOwner ? 'Las carpetas quedan en la sucursal hasta que arma la entrega semanal. Cuando Elías las recibe, pasan a estar en poder de Caseros; si devuelve alguna, vuelve a la sucursal con el motivo.' : 'Carpetas que entrega Tesorería Liniers. Al marcarlas como recibidas quedan en su poder; si algo falta, devuélvalas con el motivo.'; }
     else if(tab==='caseros'){ titulo = 'Tesorería Caseros'; sub = 'Entregas de Tesorería Liniers: cuente el efectivo de cada una y acéptela. Si no coincide, queda registrado el faltante o sobrante.'; }
-    else if(tab==='mi'){ titulo = 'Caja ' + CAJAS[S.perfil.caja]; sub = S.perfil.caja==='tesoreria' ? 'Sus ventas y los pases que aceptó, hasta que los entregue a la Tesorería Caseros.' : 'Cargue las ventas de su caja y, cuando corresponda, páselas a Tesorería Liniers con su comprobante.'; }
+    else if(tab==='mi'){ titulo = 'Caja ' + CAJAS[S.perfil.caja]; sub = S.perfil.caja==='tesoreria' ? 'Sus pagos y los pases que aceptó, hasta que los entregue a la Tesorería Caseros.' : 'Cargue los pagos de su caja y, cuando corresponda, páselos a Tesorería Liniers con su comprobante.'; }
     else { const e = S.cajas[tab.slice(2)]; if(e && e.perfil){ titulo = 'Caja ' + CAJAS[e.perfil.caja]; sub = 'Vista de control de la caja a cargo de ' + e.perfil.responsable + '.'; } }
     $('view-title').textContent = titulo; $('crumb').textContent = crumb; $('sub').textContent = sub; $('sub').hidden = !sub;
     document.title = titulo + ' · Tesorería Más Dueños';
