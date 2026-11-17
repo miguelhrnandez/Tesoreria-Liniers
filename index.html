@@ -203,6 +203,11 @@ table.mini td{padding:5px 8px;background:var(--surface)!important}
 .llevar-row .cli small{color:var(--muted);margin-left:6px}
 .llevar-row .m{white-space:nowrap;text-align:right}
 .llevar-row.pase .cli{font-style:italic}
+.pase-chip{display:inline-flex;align-items:center;gap:5px;margin-left:8px;background:var(--ok-soft);color:var(--ok);border-radius:999px;padding:1px 8px;font-size:11.5px;font-weight:600;line-height:1.5;white-space:nowrap;vertical-align:1px}
+.pase-chip::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+tbody tr.pase-l.dif td, .llevar-row.dif{color:var(--danger);font-size:12.5px}
+tbody tr.pase-l.dif td{padding-top:6px;padding-bottom:6px}
+.llevar-row .cli .pase-chip{margin-left:6px}
 table.mini tr.det-pase td{font-weight:600}
 table.mini tr.det-v td{font-size:12px;color:var(--muted);padding-top:3px;padding-bottom:3px}
 table.mini tr.det-v td:nth-child(2){padding-left:22px}
@@ -715,7 +720,7 @@ details.st-tabla .tablewrap{margin-top:10px}
 
       <button type="button" class="link gate-out" id="btn-salir-gate" hidden>Cerrar sesión</button>
       <div class="gate-foot"><span>Tesorería Liniers · Onboarding · Retención · Gerente Suc</span><span>Spazios</span></div>
-      <div class="version">Versión 2026-11-14 b · pagos</div>
+      <div class="version">Versión 2026-11-17 · pases en una línea</div>
       <div class="tema-fila" style="max-width:260px"><span class="tema-lbl">Apariencia<small data-tema-txt></small></span><div class="tema ico-tema" role="group" aria-label="Apariencia" data-tema-grupo>
         <button type="button" data-tema="light" aria-label="Claro" title="Claro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><button type="button" data-tema="dark" aria-label="Oscuro" title="Oscuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button><button type="button" data-tema="auto" aria-label="Automático" title="Automático (según el equipo)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button></div>
       </div>
@@ -739,7 +744,7 @@ details.st-tabla .tablewrap{margin-top:10px}
         <button type="button" data-tema="light" aria-label="Claro" title="Claro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button><button type="button" data-tema="dark" aria-label="Oscuro" title="Oscuro"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg></button><button type="button" data-tema="auto" aria-label="Automático" title="Automático (según el equipo)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
       </div></div>
       <div class="status" id="status"><span class="dot"></span><span>Conectando…</span></div>
-      <div class="version">Versión 2026-11-14 b · pagos</div>
+      <div class="version">Versión 2026-11-17 · pases en una línea</div>
     </div>
   </aside>
   <div class="scrim" id="scrim" hidden></div>
@@ -1151,24 +1156,34 @@ details.st-tabla .tablewrap{margin-top:10px}
     }
     head(false);
     const fit = (t, w) => doc.splitTextToSize(String(t||'—'), w)[0];
-    p.movimientos.slice().sort((a,b)=> monOf(a).localeCompare(monOf(b)) || (a.fecha||'').localeCompare(b.fecha||'')).forEach(m => {
+    const linea = (fecha, cliente, concepto, recibo, monto, k, etiqueta) => {
       if(y > 278) head(true);
-      doc.text(fdate(m.fecha), cols[0]+1, y); doc.text(fit(m.cliente, 55), cols[1], y); doc.text(fit(m.concepto, 44), cols[2], y);
-      if(String(m.recibo||'').length > 10){ doc.setFontSize(7); doc.text(String(m.recibo), cols[3], y); doc.setFontSize(9); } else doc.text(fit(m.recibo, 26), cols[3], y);
-      doc.text(fmt(m.monto, monOf(m)), R-1, y, {align:'right'});
+      doc.text(fdate(fecha), cols[0]+1, y);
+      if(etiqueta){
+        // nombre del cliente y, al lado, la etiqueta del pase en verde y más chica
+        doc.setFontSize(7); const we = doc.getTextWidth(etiqueta) + 2; doc.setFontSize(9);
+        const nom = fit(cliente, Math.max(20, 55 - we)); doc.text(nom, cols[1], y);
+        const x = cols[1] + doc.getTextWidth(nom) + 2;
+        doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(46,125,79); doc.text(etiqueta, x, y);
+        doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(20);
+      } else doc.text(fit(cliente, 55), cols[1], y);
+      doc.text(fit(concepto, 44), cols[2], y);
+      if(String(recibo||'').length > 10){ doc.setFontSize(7); doc.text(String(recibo), cols[3], y); doc.setFontSize(9); } else doc.text(fit(recibo, 26), cols[3], y);
+      doc.text(fmt(monto, k), R-1, y, {align:'right'});
       doc.setDrawColor(215); doc.setLineWidth(0.15); doc.line(L, y+2.2, R, y+2.2);
       y += 6.5;
-      if(m.tipo==='pase'){
-        // ventas que trajo ese pase, más chicas y con sangría
-        const d = ventasDeItem(m); const k = monOf(m);
-        doc.setFontSize(8); doc.setTextColor(95);
-        d.ventas.forEach(v => { if(y > 278){ head(true); doc.setFontSize(8); doc.setTextColor(95); }
-          doc.text(fdate(v.fecha), cols[0]+5, y); doc.text(fit(v.cliente, 51), cols[1]+4, y); doc.text(fit(v.concepto, 44), cols[2], y); doc.text(fit(v.recibo, 26), cols[3], y); doc.text(fmt(v.monto, k), R-1, y, {align:'right'});
-          y += 5; });
-        if(d.dif){ if(y > 278){ head(true); doc.setFontSize(8); } doc.setTextColor(150,30,30); doc.text((d.dif<0?'Faltante':'Sobrante') + ' en el conteo del pase', cols[1]+4, y); doc.text((d.dif<0?'-':'+') + fmt(Math.abs(d.dif), k), R-1, y, {align:'right'}); y += 5; }
-        if(d.ventas.length || d.dif){ doc.setDrawColor(215); doc.line(L, y-2.8, R, y-2.8); y += 1.5; }
-        doc.setFontSize(9); doc.setTextColor(20);
-      }
+    };
+    p.movimientos.slice().sort((a,b)=> monOf(a).localeCompare(monOf(b)) || (a.fecha||'').localeCompare(b.fecha||'')).forEach(m => {
+      const k = monOf(m);
+      if(m.tipo!=='pase'){ linea(m.fecha, m.cliente, m.concepto, m.recibo, m.monto, k, ''); return; }
+      const d = ventasDeItem(m); const quien = String(m.entrego || paseQuien(m) || '').trim().split(/\s+/)[0] || (CAJAS[m.deCaja] || '');
+      const et = 'Pase ' + quien + ' · ' + String(m.srcNumero || m.recibo || '').slice(-4);
+      if(d.ventas.length) d.ventas.slice().sort((a,b) => (a.fecha||'').localeCompare(b.fecha||'')).forEach(v => linea(v.fecha, v.cliente, v.concepto, v.recibo, v.monto, k, et));
+      else linea(m.fecha, m.cliente, m.concepto, m.recibo, m.monto, k, et);
+      if(d.dif){ if(y > 278) head(true);
+        doc.setFontSize(8); doc.setTextColor(150,30,30);
+        doc.text((d.dif<0?'Faltante':'Sobrante') + ' en el conteo del pase ' + String(m.srcNumero || m.recibo || '').slice(-4), cols[1], y); doc.text((d.dif<0?'-':'+') + fmt(Math.abs(d.dif), k), R-1, y, {align:'right'});
+        doc.setFontSize(9); doc.setTextColor(20); doc.setDrawColor(215); doc.line(L, y+2.2, R, y+2.2); y += 6; }
     });
     const mons = MONS.filter(k => (p.totales||{})[k] > 0);
     if(y > 278 - 6*mons.length) head(true);
@@ -1340,12 +1355,12 @@ details.st-tabla .tablewrap{margin-top:10px}
       const propias = sel.filter(m => m.tipo!=='pase').sort((a,b) => monOf(a).localeCompare(monOf(b)) || (a.fecha||'').localeCompare(b.fecha||''));
       const paseRow = m => {
         const src = ((S.cajas[m.srcUid]||{}).pases||[]).find(q => q.numero===m.srcNumero) || {};
-        const ventas = (src.movimientos||[]).filter(v => monOf(v)===m.moneda);
-        const dif = ((src.diferencia||{})[m.moneda]) || 0;
-        const key = m.srcNumero+'|'+m.moneda, open = S.prevOpen.has(key);
-        return '<details class="llevar-pase" data-prev="'+esc(key)+'"'+(open?' open':'')+'><summary><span>'+fdate(m.fecha)+'</span><span class="cli">'+esc(m.recibo)+'<small>Caja '+esc(CAJAS[src.origen]||'')+' · '+esc(src.entrega||'')+' · '+ventas.length+(ventas.length===1?' pago':' pagos')+'</small></span><span class="m">'+fmt(m.monto, m.moneda)+'</span></summary>'+
-          ventas.map(v => '<div class="sub-row"><span>'+fdate(v.fecha)+'</span><span>'+esc(v.cliente)+(v.concepto?' · '+esc(v.concepto):'')+(v.recibo?' · '+esc(v.recibo):'')+'</span><span class="m">'+fmt(v.monto, monOf(v))+'</span></div>').join('')+
-          (dif ? '<div class="nota">Al recibirlo se contó '+fmt(m.monto, m.moneda)+': '+(dif<0?'faltante ':'sobrante ')+fmt(Math.abs(dif), m.moneda)+' respecto de lo cargado.</div>' : '')+'</details>';
+        const ventas = (src.movimientos||[]).filter(v => monOf(v)===m.moneda && v.tipo!=='pase').sort((a,b) => (a.fecha||'').localeCompare(b.fecha||''));
+        const dif = src.conDiferencia ? (((src.diferencia||{})[m.moneda]) || 0) : 0;
+        const chip = chipPase(m.srcNumero, src.entrega || src.nombre || '', src.origen);
+        return (ventas.length ? ventas.map(v => '<div class="llevar-row"><span>'+fdate(v.fecha)+'</span><span class="cli">'+esc(v.cliente)+chip+'</span><span class="m">'+fmt(v.monto, m.moneda)+'</span></div>').join('')
+            : '<div class="llevar-row"><span>'+fdate(m.fecha)+'</span><span class="cli">'+esc(m.cliente)+chip+'</span><span class="m">'+fmt(m.monto, m.moneda)+'</span></div>')+
+          (dif ? '<div class="llevar-row dif"><span></span><span class="cli">'+(dif<0?'Faltante':'Sobrante')+' en el conteo del pase '+esc(String(m.srcNumero).slice(-4))+'</span><span class="m">'+(dif<0?'−':'+')+fmt(Math.abs(dif), m.moneda)+'</span></div>' : '');
       };
       const subt = list => { const t = tot(list); return MONS.filter(k => t[k]>0).map(k => fmt(t[k],k)).join(' + ') || fmt(0,'ARS'); };
       let h = '<div class="llevar-h"><span>Lo que se lleva a Tesorería Caseros</span><span>'+(corte ? 'hasta el '+fdate(corte) : '')+'</span></div>';
@@ -1547,6 +1562,12 @@ details.st-tabla .tablewrap{margin-top:10px}
       '<td class="amt">'+totHTML(p.totales||{})+'</td><td>'+estado+'</td><td><div class="rowact">'+acts+'</div></td></tr>'+
       (abierto ? detallePase(p) : '');
   }
+  function paseQuien(m){ const src = S.cajas[m.srcUid]; const p = src && src.pases.find(x => x.numero===m.srcNumero); return p ? (p.entrega || p.nombre || '') : ''; }
+  // Etiqueta chica que indica de qué pase vino un pago: «Pase Ivón · W5Z2».
+  function chipPase(numero, quien, caja){
+    const nombre = String(quien||'').trim().split(/\s+/)[0] || (CAJAS[caja] || '');
+    return '<span class="pase-chip" title="'+esc('Pase '+numero+(quien ? ' · entregó '+quien : ''))+'">Pase '+esc(nombre)+' · '+esc(String(numero||'').slice(-4))+'</span>';
+  }
   // Ventas que trajo un pase recibido, para guardarlas dentro de la entrega a Caseros
   // (Tesorería Caseros no puede leer los pases de Onboarding y Retención).
   function detalleParaEntrega(m){
@@ -1566,10 +1587,12 @@ details.st-tabla .tablewrap{margin-top:10px}
     const t = p.totales||{};
     return '<tr class="det"><td colspan="7"><div class="det-h">Qué se pasó en '+esc(p.numero)+'</div><div class="tablewrap" style="border:0"><table class="mini"><thead><tr><th>Fecha</th><th>Cliente</th><th>Concepto</th><th>Recibo</th><th class="amt">Monto</th></tr></thead><tbody>'+
       movs.map(m => { const k = monOf(m);
-        let h = '<tr'+(m.tipo==='pase'?' class="det-pase"':'')+'><td>'+fdate(m.fecha)+'</td><td>'+esc(m.cliente)+'</td><td>'+esc(m.concepto||'—')+'</td><td>'+esc(m.recibo||'—')+'</td><td class="amt">'+fmt(m.monto, k)+'</td></tr>';
-        if(m.tipo==='pase'){ const d = ventasDeItem(m);
-          h += d.ventas.map(v => '<tr class="det-v"><td>'+fdate(v.fecha)+'</td><td>'+esc(v.cliente)+'</td><td>'+esc(v.concepto||'—')+'</td><td>'+esc(v.recibo||'—')+'</td><td class="amt">'+fmt(v.monto, k)+'</td></tr>').join('');
-          if(d.dif) h += '<tr class="det-v dif"><td></td><td colspan="3">'+(d.dif<0?'Faltante':'Sobrante')+' en el conteo del pase</td><td class="amt">'+(d.dif<0?'−':'+')+fmt(Math.abs(d.dif), k)+'</td></tr>'; }
+        if(m.tipo!=='pase') return '<tr><td>'+fdate(m.fecha)+'</td><td>'+esc(m.cliente)+'</td><td>'+esc(m.concepto||'—')+'</td><td>'+esc(m.recibo||'—')+'</td><td class="amt">'+fmt(m.monto, k)+'</td></tr>';
+        // un pase: sus pagos en una línea cada uno, con la etiqueta del pase
+        const d = ventasDeItem(m); const chip = chipPase(m.srcNumero || m.recibo, m.entrego || paseQuien(m), m.deCaja);
+        let h = d.ventas.length ? d.ventas.map(v => '<tr><td>'+fdate(v.fecha)+'</td><td>'+esc(v.cliente)+chip+'</td><td>'+esc(v.concepto||'—')+'</td><td>'+esc(v.recibo||'—')+'</td><td class="amt">'+fmt(v.monto, k)+'</td></tr>').join('')
+          : '<tr><td>'+fdate(m.fecha)+'</td><td>'+esc(m.cliente)+chip+'</td><td>'+esc(m.concepto||'—')+'</td><td>'+esc(m.recibo||'—')+'</td><td class="amt">'+fmt(m.monto, k)+'</td></tr>';
+        if(d.dif) h += '<tr class="det-v dif"><td></td><td colspan="3">'+(d.dif<0?'Faltante':'Sobrante')+' en el conteo del pase '+esc(String(m.srcNumero||m.recibo||'').slice(-4))+'</td><td class="amt">'+(d.dif<0?'−':'+')+fmt(Math.abs(d.dif), k)+'</td></tr>';
         return h; }).join('')+
       '</tbody><tfoot>'+MONS.filter(k => t[k]>0).map(k => '<tr><td colspan="4">Total '+MON[k].nombre.toLowerCase()+'</td><td class="amt">'+fmt(t[k],k)+'</td></tr>').join('')+'</tfoot></table></div></td></tr>';
   }
@@ -1601,24 +1624,22 @@ details.st-tabla .tablewrap{margin-top:10px}
       return '<tr><td class="num">'+fdate(m.fecha)+'</td><td>'+esc(m.cliente)+'</td><td>'+(m.concepto?'<span class="tag">'+esc(m.concepto)+'</span>':'—')+'</td><td class="muted">'+esc(m.recibo||'—')+'</td><td class="amt num">'+fmt(m.monto, monOf(m))+'</td>'+act+'</tr>';
     }).join('');
   }
-  // Un pase recibido se muestra como un grupo: la fila del pase (lo contado) y debajo cada venta que trajo.
+  // Un pase recibido se muestra como sus pagos, una línea cada uno, con la etiqueta del pase.
+  // El botón para entregarlo va en el primer pago; si hubo diferencia en el conteo, una línea roja.
   function filasPaseRecibido(m, editable){
     const src = S.cajas[m.srcUid]; const p = src && src.pases.find(x => x.numero===m.srcNumero); const k = monOf(m);
     const ventas = p ? (p.movimientos||[]).filter(v => monOf(v)===k && v.tipo!=='pase').sort((a,b) => (a.fecha||'').localeCompare(b.fecha||'')) : [];
-    const abierto = !(S.pasesCerrados && S.pasesCerrados.has(m.id));
     const quien = p ? (p.entrega || p.nombre || (src.perfil && src.perfil.responsable) || '') : '';
-    const solo = editable ? '<button type="button" class="small" data-act="solo" data-id="'+esc(m.id)+'">Entregar solo este</button>' : '';
-    const tog = ventas.length ? '<button type="button" class="link small pase-tog" data-pase-tog="'+esc(m.id)+'" aria-expanded="'+abierto+'">'+(abierto ? '▾ Ocultar ' : '▸ Ver ')+ventas.length+(ventas.length===1?' pago':' pagos')+'</button>' : '';
-    let h = '<tr class="pase-h"><td class="num">'+fdate(m.fecha)+'</td><td><b>Pase de '+esc(p ? CAJAS[p.origen] : 'otra caja')+'</b>'+(quien ? '<span class="sub">Entregó '+esc(quien)+' · recibido el '+fdate(m.fecha)+'</span>' : '')+tog+'</td><td><span class="tag">Pase recibido</span></td><td class="muted">'+esc(m.recibo||'—')+'</td><td class="amt num"><b>'+fmt(m.monto, k)+'</b></td>'+
-      (editable ? '<td class="amt"><div class="rowact">'+solo+'</div></td>' : '')+'</tr>';
-    if(abierto){
-      h += ventas.map(v => '<tr class="pase-d"><td class="num">'+fdate(v.fecha)+'</td><td>'+esc(v.cliente)+'</td><td>'+(v.concepto?'<span class="tag">'+esc(v.concepto)+'</span>':'—')+'</td><td class="muted">'+esc(v.recibo||'—')+'</td><td class="amt num">'+fmt(v.monto, k)+'</td>'+(editable?'<td></td>':'')+'</tr>').join('');
-      const dif = p && p.conDiferencia ? ((p.diferencia||{})[k]||0) : 0;
-      if(dif) h += '<tr class="pase-d dif"><td></td><td colspan="3">'+(dif<0 ? 'Faltante en el conteo' : 'Sobrante en el conteo')+' <span class="muted">· por eso el pase suma lo contado</span></td><td class="amt num">'+(dif<0?'−':'+')+fmt(Math.abs(dif), k)+'</td>'+(editable?'<td></td>':'')+'</tr>';
-    }
+    const chip = chipPase(m.srcNumero, quien, p && p.origen);
+    const multi = p && MONS.filter(x => (p.totales||{})[x] > 0).length > 1;
+    const boton = editable ? '<td class="amt"><div class="rowact"><button type="button" class="small" data-act="solo" data-id="'+esc(m.id)+'" title="Entrega este pase'+(multi ? ' (solo '+MON[k].nombre.toLowerCase()+')' : '')+'">Entregar pase '+esc(String(m.srcNumero).slice(-4))+(multi ? ' · '+(k==='USD'?'US$':'$') : '')+'</button></div></td>' : '';
+    const vacia = editable ? '<td></td>' : '';
+    const filas = ventas.length ? ventas : [{fecha:m.fecha, cliente:'Pase de '+(p ? CAJAS[p.origen] : 'otra caja'), concepto:'', recibo:m.srcNumero, monto:m.monto}];
+    let h = filas.map((v, i) => '<tr class="pase-l'+(i===0?' pase-1':'')+'"><td class="num">'+fdate(v.fecha)+'</td><td>'+esc(v.cliente)+chip+'</td><td>'+(v.concepto?'<span class="tag">'+esc(v.concepto)+'</span>':'—')+'</td><td class="muted">'+esc(v.recibo||'—')+'</td><td class="amt num">'+fmt(v.monto, k)+'</td>'+(i===0 ? boton : vacia)+'</tr>').join('');
+    const dif = p && p.conDiferencia ? ((p.diferencia||{})[k]||0) : 0;
+    if(dif) h += '<tr class="pase-l dif"><td></td><td colspan="3">'+(dif<0 ? 'Faltante' : 'Sobrante')+' en el conteo del pase '+esc(String(m.srcNumero).slice(-4))+'</td><td class="amt num">'+(dif<0?'−':'+')+fmt(Math.abs(dif), k)+'</td>'+vacia+'</tr>';
     return h;
   }
-  document.addEventListener('click', ev => { const b = ev.target.closest('[data-pase-tog]'); if(!b) return; S.pasesCerrados = S.pasesCerrados || new Set(); const id = b.dataset.paseTog; if(S.pasesCerrados.has(id)) S.pasesCerrados.delete(id); else S.pasesCerrados.add(id); render(); });
   function footMov(e, editable){
     const items = enCaja(e); if(!items.length) return '';
     const t = tot(items); const pal = esTesoreriaPropia(e) ? ['movimiento','movimientos'] : ['pago','pagos'];
